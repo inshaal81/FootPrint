@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,700;1,300&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.topContent {
+    background-color: #1F2937;
+    color: #F9FAF8;
+    padding-top: 12px;
+    padding-bottom: 30px;
+    padding-right: 40px;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.headerLogo {
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.headerLinks {
+    list-style: none;
+    gap: 10px;
+    display: flex;
+}
+
+.headerLinks a {
+    text-decoration: none;
+    font-size: 18px;
+    color: lightgray;
+}
+
+.logInBtn button {
+    border: none;
+}
+
+button {
+    color: #E5E7EB;
+    background-color: #3882F6;
+    font-weight: 900;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-right: 22px;
+    padding-left: 22px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.topSection {
+    display: flex;
+    justify-content: space-between;
+}
+
+.allText {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.title {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.subtextOne {
+    font-size: 18px;
+    color: #E5E7EB;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+/*
+.topImage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+img {
+  width: 500px;
+  height: 250px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  border: 6px solid #b4ceff;
+}
+*/
+.stats {
+
+}
+
+.mid-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.subtextTwo {
+    font-size: 36px;
+    color: #1F2937;
+    font-weight: 900;
+    margin-bottom: 32px;
+    margin-top: 16px;
+}
+
+.featureBoxes {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 128px;
+}
+
+.leakPathMapping, .realTimeAlerts, .policyGuardrails, .box4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.box {
+  border-radius: 25px;
+  border: 2px solid #3882F6;
+  padding: 20px;
+  width: 180px;
+  height: 150px;
+}
+
+.text {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    width: 180px;
+}
+
+.signUpPopUp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #3882F6;
+    color: #E5E7EB;
+    margin-left: 350px;
+    margin-right: 350px;
+    padding-top: 45px;
+    padding-bottom: 45px;
+    padding-left: 64px;
+    padding-right: 64px;
+    border-radius: 8px;
+}
+
+.titleTwo {
+    font-weight: bold;
+    font-size: 20px;
+    padding-bottom: 8px;
+}
+
+.textTwo {
+    font-size: 16px;
+}
+
+.singUpBtn button {
+  border: 2px solid #E5E7EB;
+}
+
+.footer {
+    background-color: #eeeeee;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 70px;
+}

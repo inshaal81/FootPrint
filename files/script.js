@@ -15,18 +15,18 @@ form.addEventListener("submit", (e) => {
 
 //Scroll up button
 
-const topBtn = document.getElementById("topBtn");
+const scrollUpBtn = document.getElementById("scrollUpBtn");
 
 
 window.addEventListener("scroll", () => {
   if (window.scrollY > 300) {
-    topBtn.style.display = "block";
+    scrollUpBtn.style.display = "block";
   } else {
-    topBtn.style.display = "none";
+    scrollUpBtn.style.display = "none";
   }
 });
 
-topBtn.addEventListener("click", () => {
+scrollUpBtn.addEventListener("click", () => {
   window.scrollTo({
     top: 0,
     behavior: "smooth"
