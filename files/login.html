@@ -1,4 +1,40 @@
-<form action="{{ url_for(login') }}" method="POST">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="topContent">
+        <div class="header">
+            <div class="headerLogo">footPrint</div>
+
+            <div class="headerItems">
+                <div>
+                    <ul class="headerLinks">
+                        <li><a href="#" class="aboutUs">About Us</a></li>
+                        <li><a href="#" class="howItWorks">How It Works!</a></li>
+                    </ul>
+                </div>
+
+                <button id="themeToggle">Theme Toggle</button>
+
+                <!-- add login button here -->
+                <button id="logInBtn" type="submit">Log In</button>
+            </div>
+        </div>
+<form class="login-form" action="{{ url_for('login') }}" method="POST">
+    <label for="username">Username:</label>
+    <input type="text" name="username" required>
+    <label for="password">Password:</label>
+    <input type="password" name="password" required>
+    <button type="submit">Login</button>
+</form>
+<a href="{{ url_for('register') }}">Create an account</a>
+</body>
+</html><form action="{{ url_for(login') }}" method="POST">
     <label for="username">Username:</label>
     <input type="text" name="username" required>
     <label for="password">Password:</label>
