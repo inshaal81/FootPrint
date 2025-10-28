@@ -198,12 +198,11 @@ body {
     gap: 18px;
 }
 
-.leakPathMapping, .realTimeAlerts, .policyGuardrails, .box4 {
+.leakPathMapping, .realTimeAlerts, .policyGuardrails, .emptyBox {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: fit-content;
-    padding: 8px;
     border-radius: 12px;
     border: 1px solid var(--line);
     background: var(--card); 
