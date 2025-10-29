@@ -37,3 +37,32 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
   });
   
+
+
+  //POP UP LOGIN
+fetch("login.html")
+  .then(response => response.text())
+  .then(html => {
+    document.getElementById("popupContainer").innerHTML = html;
+    setupPopup(); // Initialize after loading
+  })
+  .catch(err => console.error("Failed to load login popup:", err));
+
+function setupPopup() {
+  const modal = document.getElementById("loginModal");
+  const btn = document.getElementById("loginBtn");
+  const closeBtn = document.querySelector(".close");
+
+  if (!modal || !btn || !closeBtn) return;
+
+  // Show popup when button clicked
+  btn.onclick = () => (modal.style.display = "flex");
+
+  // Close popup when X clicked
+  closeBtn.onclick = () => (modal.style.display = "none");
+
+  // Close popup when clicking outside
+  window.onclick = (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  };
+}

@@ -179,6 +179,7 @@ body {
 
 
 
+
 .midContent {
     display: flex;
     flex-direction: column;
@@ -365,4 +366,87 @@ body {
     font-weight: 600;
     padding: 30px;
     margin-top: 30px;
+}
+
+
+/* ===== MODAL BACKGROUND ===== */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* dark transparent background */
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== MODAL CONTENT BOX ===== */
+.modal-content {
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ===== CLOSE BUTTON (X) ===== */
+.close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}
+
+/* ===== FORM ELEMENTS ===== */
+#loginForm {
+  display: flex;
+  flex-direction: column;
+}
+
+#loginForm input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+#loginForm button {
+  padding: 10px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+#loginForm button:hover {
+  background-color: #555;
+}
+
+/* ===== FADE ANIMATION ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
