@@ -39,30 +39,42 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   
 
 
-  //POP UP LOGIN
-fetch("login.html")
-  .then(response => response.text())
-  .then(html => {
-    document.getElementById("popupContainer").innerHTML = html;
-    setupPopup(); // Initialize after loading
-  })
-  .catch(err => console.error("Failed to load login popup:", err));
+  // POP UP LOGIN
+  const popupContainer = document.getElementById("popupContainer");
 
-function setupPopup() {
-  const modal = document.getElementById("loginModal");
-  const btn = document.getElementById("loginBtn");
-  const closeBtn = document.querySelector(".close");
+  if (popupContainer) {
+    fetch("login.html")
+      .then(response => response.text())
+      .then(html => {
+        popupContainer.innerHTML = html;
+        setupPopup(); // Initialize after loading
+      })
+      .catch(err => console.error("Failed to load login popup:", err));
+  } else {
+    console.warn("popupContainer not found in DOM; login popup won't be injected.");
+  }
 
-  if (!modal || !btn || !closeBtn) return;
+  function setupPopup() {
+    const modal = document.getElementById("loginModal");
+    // use the existing button id from index.html
+    const btn = document.getElementById("logInBtn");
+    const closeBtn = modal ? modal.querySelector(".close") : null;
 
-  // Show popup when button clicked
-  btn.onclick = () => (modal.style.display = "flex");
+    if (!modal || !btn || !closeBtn) return;
 
-  // Close popup when X clicked
-  closeBtn.onclick = () => (modal.style.display = "none");
+    // Show popup when button clicked
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      modal.style.display = "flex";
+    });
 
-  // Close popup when clicking outside
-  window.onclick = (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  };
-}
+    // Close popup when X clicked
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    // Close popup when clicking outside the modal content
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+  }

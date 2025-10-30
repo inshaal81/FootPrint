@@ -399,6 +399,63 @@ body {
   transform: translateY(-1px);
 }
 
+/* Modal (login popup) styles */
+.modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card);
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.login-form input {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.login-form button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--orange);
+  color: var(--cta-text);
+  border: none;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
 .footer {
     display: flex;
     justify-content: center;
