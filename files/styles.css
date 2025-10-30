@@ -99,7 +99,38 @@ body {
   transform: translateY(-1px);
 }
 
+.subtextOne {
+  font-size: 18px;
+  color: var(--muted, #6b7280);
+  margin-top: 10px;
+  line-height: 1.4;
+}
 
+.subtextOne .highlight {
+  color: #1F2937;
+  font-weight: 700;   
+}
+
+.hero-card {
+  padding: 18px;
+  max-width: 750px;
+  position: relative;     
+  left: 900px;             
+  top: -300px;             
+}
+
+
+.hero-preview {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-preview img {
+  width: 100%;
+  height: auto;
+}
 
 .topContent {
     display: flex;
