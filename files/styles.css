@@ -399,6 +399,88 @@ body {
   transform: translateY(-1px);
 }
 
+/* Shared modal styles for login/signup popups */
+.modal {
+  display: none; /* shown by setting display:flex */
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  background: rgba(0,0,0,0.45);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal[style*="display: flex"], .modal[style*="display:flex"] {
+  /* allow inline-style toggling to show modal */
+  display: flex;
+}
+
+.modal-content {
+  background: var(--card);
+  color: var(--text);
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  padding: 22px 26px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.15);
+  position: relative;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modal-content label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"],
+.modal-content input[type="email"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+}
+
+.modal-content button[type="submit"] {
+  margin-top: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--text);
+  color: var(--cta-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-content a {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.modal-content a:hover {
+  text-decoration: underline;
+}
+
 /* Modal (login popup) styles */
 .modal {
   display: none; /* hidden by default */
@@ -548,4 +630,77 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/*To Dark mode*/
+body.dark {
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+body.dark .header {
+  background-color: #161616;
+  border-bottom: 2px solid #333;
+}
+body.dark .headerLogo,
+body.dark .headerLinks a,
+body.dark .headerItems,
+body.dark .banner,
+body.dark .title,
+body.dark .subtextOne,
+body.dark .highlight {
+  color: #ffffff;
+}
+body.dark .banner,
+body.dark .highlight,
+body.dark .titleTwo {
+  color: #ffd27f;
+  border-color: #ffd27f;
+  background: rgba(255, 210, 127, 0.2);
+}
+body.dark #themeToggle,
+body.dark #logInBtn,
+body.dark #signUpBtn,
+body.dark #scrollUpBtn {
+  background-color: #2b2b2b;
+  color: #ffffff;
+  border: 1px solid #777;
+  transition: all 0.2s;
+}
+body.dark #themeToggle:hover,
+body.dark #logInBtn:hover,
+body.dark #signUpBtn:hover,
+body.dark #scrollUpBtn:hover {
+  background-color: #ffd27f;
+  color: #000;
+}
+body.dark .topContent,
+body.dark .midContent,
+body.dark .endContent,
+body.dark .signUpPopUp {
+  background-color: #121212;
+  color: #ffffff;
+  border-color: #333;
+}
+body.dark .featureBoxes > div,
+body.dark .stats > div,
+body.dark .howItWorks > div {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #444;
+}
+body.dark .statTitle {
+  color: #e0e0e0;
+}
+body.dark .statText {
+  color: #ffffff;
+  font-weight: bold;
+}
+body.dark .modal-content {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #555;
+}
+body.dark .close {
+  color: #ffffff;
 }
