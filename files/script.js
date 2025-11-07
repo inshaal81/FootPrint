@@ -46,7 +46,7 @@ if (loginBtn && popupContainer) {
     fetch("login.html")
       .then(r => r.text())
       .then(html => {
-        const modal = injectModal(html, "loginModal"); // login.html must have id="loginModal"
+        const modal = injectModal(html, "loginModal"); 
         if (modal) modal.style.display = "flex";
       })
       .catch(err => console.error("Failed to load login popup:", err));
