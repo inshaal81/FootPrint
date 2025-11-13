@@ -127,7 +127,32 @@ body {
   flex-direction: column;
   color: #1f2937;
   border-bottom: 2px solid var(--line);
-  padding-bottom: 150px;
+  padding-bottom: 540px;
+}
+
+.topContent {
+    position: relative;
+    background-image: url("img/bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.topContent::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.75); 
+    backdrop-filter: blur(2px);            
+    z-index: 0;
+}
+
+.topContent > * {
+    position: relative;
+    z-index: 1;
 }
 
 .topSection {
@@ -250,6 +275,7 @@ body {
   border: 2px solid var(--orange);
   background: var(--bg);
   padding: 15px;
+  width: max-content;
 }
 
 .subtextThree {
@@ -258,7 +284,7 @@ body {
   font-weight: bold;
 }
 
-.box1, .box2, .box3, .box4, .box5 {
+.box1, .box2, .box3, .box4 {
   display: flex;
   flex-direction: column;
   border-radius: 14px;
@@ -488,7 +514,24 @@ body.dark #scrollUpBtn:hover {
   background-color: #ffd27f;
   color: #000;
 }
-body.dark .topContent,
+body.dark .topContent {
+    background-image: url("img/bbg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+body.dark .topContent::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45); 
+    backdrop-filter: blur(10px);            
+    z-index: 0;
+}
 body.dark .midContent,
 body.dark .endContent,
 body.dark .signUpPopUp {
@@ -496,13 +539,35 @@ body.dark .signUpPopUp {
   color: #ffffff;
   border-color: #333;
 }
+
+body.dark .featureTitle{
+    color:white;
+}
+body.dark .featureText{
+    color:rgb(206, 206, 206);
+}
 body.dark .featureBoxes > div,
 body.dark .stats > div,
-body.dark .howItWorks > div {
-  background-color: #1a1a1a;
-  color: #ffffff;
-  border: 1px solid #444;
+body.dark .howItWorks {
+    background-color: #121212;
+    border: 2px solid #ffd27f; 
 }
+
+body.dark .howItWorks .arrow {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #ffd27f;
+}
+
+body.dark .howItWorks > div {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border: 1px solid #444;
+}
+
+
+
 body.dark .statTitle {
   color: #e0e0e0;
 }
