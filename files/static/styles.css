@@ -260,9 +260,10 @@ body {
   flex-direction: column;
   align-items: center;
   width: fit-content;
-  border-radius: 12px;
+  border-radius: 20px;
   border: 1px solid var(--line);
   background: var(--card);
+  padding: 24px 32px;
 }
 
 .featureTitle {
@@ -290,8 +291,8 @@ body {
   border-radius: 16px;
   border: 2px solid var(--orange);
   background: var(--bg);
-  padding: 15px;
-  width: max-content;
+  padding: 10px;
+
 }
 
 @media (max-width: 900px) {
@@ -312,8 +313,11 @@ body {
     border-radius: 14px;
     border: 2px dashed var(--lightgray);
     background: var(--card);
-    padding: 18px 215px 18px 18px;
+    padding: 12px 14px ;
     gap: 15px;
+
+    max-width: 350px;
+    width: 100%;
 }
 
 @media (max-width: 900px) {
