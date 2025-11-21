@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ===== Theme toggle =====
     const toggle = document.getElementById("themeToggle");
-    if (toggle) {
+    if (toggle) {   
         toggle.addEventListener("click", () => {
             document.body.classList.toggle("dark");
         });
