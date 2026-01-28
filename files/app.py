@@ -88,6 +88,7 @@ def signup():
     flash("Signup successful! Please log in.", "success")
     return redirect(url_for("home"))
 
+#Khang
 # ===== Dashboard =====
 @app.route("/dashboard")
 def dashboard():
