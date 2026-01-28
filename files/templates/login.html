@@ -1,6 +1,20 @@
+<!--Terry-->
 <div id="loginModal" class="modal auth-modal">
   <div class="modal-content">
     <span class="close">&times;</span>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="modalFlashes">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
     <form class="login-form" action="{{ url_for('login') }}" method="POST">
       <label for="username">Username:</label>

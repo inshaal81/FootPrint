@@ -1,3 +1,4 @@
+<!--Ishaal-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,6 +148,58 @@
         <button id="scrollUpBtn">&uarr;</button>
     </div>
 
+<!--Terry-->
+<!-- ===== Login Modal ===== -->
+<div id="loginModal" class="modal auth-modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+  
+      <!-- Flash messages -->
+      <div class="modalFlashes">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+  
+      <form class="login-form" action="{{ url_for('login') }}" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
+        <button type="submit">Login</button>
+      </form>
+  
+      <p class="modal-bottom-text">
+        Don’t have an account? 
+        <a href="#" id="openSignupLink">Create one</a>
+      </p>
+    </div>
+  </div>
+
+<!--Terry-->
+<!-- ===== Signup Modal ===== -->
+<div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+  
+      <form action="{{ url_for('signup') }}" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="email">Email:</label>
+        <input type="text" name="email" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" name="confirm_password" required>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+  
     <div class="footer">
         Copyright @ footPrint 2025
     </div>

@@ -1,3 +1,4 @@
+/*Trung and Khang*/
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;1,300&display=swap');
 
 :root {
@@ -458,11 +459,20 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   animation: fadeIn 0.3s ease-in-out;
 }
+
+.login-form,
+#signupModal form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+}
+
 
 .close {
   position: absolute;
@@ -619,8 +629,6 @@ body.dark .howItWorks > div {
   border: 1px solid #444;
 }
 
-
-
 body.dark .statTitle {
   color: #e0e0e0;
 }
@@ -641,4 +649,55 @@ body.dark .footer {
   background-color: #161616;
   border-top: 1px solid #333;
   color: #aaaaaa;
+}
+
+/*Terry*/
+
+.flashContainer {
+  width: 100%;
+  position: fixed;  /* stays at top of page */
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.flash {
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 5px;
+  font-weight: bold;
+  width: fit-content;
+}
+
+/* Categories from flash() */
+.flash.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.modalFlashes {
+  margin-bottom: 10px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.modalFlashes .flash {
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+/* Categories */
+.modalFlashes .flash.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }

@@ -1,92 +1,70 @@
+//Terry
 document.addEventListener('DOMContentLoaded', () => {
-  const popupContainer = document.getElementById("popupContainer");
+    const loginModal = document.getElementById("loginModal");
 
-  // ===== Theme toggle =====
-  const toggle = document.getElementById("themeToggle");
-  if (toggle) {
-      toggle.addEventListener("click", () => {
-          document.body.classList.toggle("dark");
-      });
-  }
+// If login modal has flashes, open it
+    if (loginModal?.querySelector(".modalFlashes")?.children.length > 0) {
+        loginModal.style.display = "flex";
+    }
 
-  // ===== Scroll up button =====
-  const scrollUpBtn = document.getElementById("scrollUpBtn");
-  if (scrollUpBtn) {
-      window.addEventListener("scroll", () => {
-          scrollUpBtn.style.display = window.scrollY > 300 ? "block" : "none";
-      });
-      scrollUpBtn.addEventListener("click", () => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-  }
+    // ===== Theme toggle =====
+    const toggle = document.getElementById("themeToggle");
+    toggle?.addEventListener("click", () => document.body.classList.toggle("dark"));
+  
+    // ===== Scroll up button =====
+    const scrollUpBtn = document.getElementById("scrollUpBtn");
+    if (scrollUpBtn) {
+        window.addEventListener("scroll", () => {
+            scrollUpBtn.style.display = window.scrollY > 300 ? "block" : "none";
+        });
+        scrollUpBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    }
+  
+    // ===== Open login modal =====
+    const loginBtn = document.getElementById("logInBtn");
+    loginBtn?.addEventListener("click", e => {
+        e.preventDefault();
+        const loginModal = document.getElementById("loginModal");
+        if (loginModal) loginModal.style.display = "flex";
+    });
+  
+    // ===== Open signup modal =====
+    const signUpBtn = document.getElementById("signUpBtn");
+    signUpBtn?.addEventListener("click", e => {
+        e.preventDefault();
+        const signupModal = document.getElementById("signupModal");
+        if (signupModal) signupModal.style.display = "flex";
+    });
 
-  // ===== Inject modal helper =====
-  function injectModal(html, modalId) {
-      if (!popupContainer) return null;
-      popupContainer.innerHTML = html;
-      const modal = document.getElementById(modalId);
-      const closeBtn = modal?.querySelector(".close");
-      if (!modal || !closeBtn) return null;
-
-      closeBtn.addEventListener("click", () => (modal.style.display = "none"));
-      modal.addEventListener("click", e => {
-          if (e.target === modal) modal.style.display = "none";
-      });
-      return modal;
-  }
-
-  // ===== Open login modal =====
-  const loginBtn = document.getElementById("logInBtn");
-  if (loginBtn) {
-      loginBtn.addEventListener("click", e => {
-          e.preventDefault();
-          fetch("/login_modal") // Flask route serving login.html
-              .then(r => r.text())
-              .then(html => {
-                  const modal = injectModal(html, "loginModal");
-                  if (modal) modal.style.display = "flex";
-              })
-              .catch(err => console.error("Failed to load login popup:", err));
-      });
-  }
-
-  // ===== Open signup modal =====
-  const signUpBtn = document.getElementById("signUpBtn");
-  if (signUpBtn) {
-      signUpBtn.addEventListener("click", e => {
-          e.preventDefault();
-          fetch("/signup_modal") // Flask route serving signup.html
-              .then(r => r.text())
-              .then(html => {
-                  const modal = injectModal(html, "signupModal");
-                  if (modal) modal.style.display = "flex";
-              })
-              .catch(err => console.error("Failed to load signup popup:", err));
-      });
-  }
-
-  // ===== Delegate: "Create one" link inside LOGIN opens SIGNUP =====
-  document.addEventListener("click", e => {
-      if (e.target?.id === "openSignupLink") {
-          e.preventDefault();
-          const loginModal = document.getElementById("loginModal");
-          if (loginModal) loginModal.style.display = "none";
-
-          fetch("/signup_modal")
-              .then(r => r.text())
-              .then(html => {
-                  const modal = injectModal(html, "signupModal");
-                  if (modal) modal.style.display = "flex";
-              })
-              .catch(err => console.error("Failed to load signup popup:", err));
-      }
+//Khang
+    // ===== "Create one" link inside login opens signup =====
+    const openSignupLink = document.getElementById("openSignupLink");
+    openSignupLink?.addEventListener("click", e => {
+        e.preventDefault();
+        const loginModal = document.getElementById("loginModal");
+        const signupModal = document.getElementById("signupModal");
+        if (loginModal) loginModal.style.display = "none";
+        if (signupModal) signupModal.style.display = "flex";
+    });
+  
+    // ===== Close modals =====
+    document.querySelectorAll(".modal .close").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const modal = e.target.closest(".modal");
+            if (modal) modal.style.display = "none";
+        });
+    });
+  
+    // ===== Close modals when clicking outside =====
+    document.querySelectorAll(".modal").forEach(modal => {
+        modal.addEventListener("click", e => {
+            if (e.target === modal) modal.style.display = "none";
+        });
+    });
+  
+    // ===== Logout button =====
+    const logOutBtn = document.getElementById("logOutBtn");
+    logOutBtn?.addEventListener("click", () => window.location.href = "/logout");
+  
   });
-
-  // ===== Logout button =====
-  const logOutBtn = document.getElementById("logOutBtn");
-  if (logOutBtn) {
-      logOutBtn.addEventListener("click", () => {
-          window.location.href = "/logout";
-      });
-  }
-});
+  

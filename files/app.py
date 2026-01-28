@@ -1,15 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+#Terry 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 from security import check_login  # <-- import your login check logic
+import os   # ✅ added
 
-# ✅ Create ONE Flask app
+#Terry
+# ===== Create Flask app =====
 app = Flask(__name__, static_folder='static')
 
-# ✅ Configure and link the database
+# ===== Secure Secret Key =====
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-only-secret-key")
+
+if app.config.get("ENV") == "production" and app.secret_key == "dev-only-secret":
+    raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
+
+# ===== Configure and link the database =====
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'your_secret_key_here'
 db = SQLAlchemy(app)
 
 # ===== User model =====
@@ -38,14 +46,15 @@ def login():
     password = request.form.get("password")
     user = User.query.filter_by(username=username).first()
 
-    # Use security module
     result = check_login(username, password, user)
     if result is None:
         session['user_id'] = user.id
         session['username'] = user.username
+        flash("Login successful!", "success")
         return redirect(url_for('dashboard'))
     else:
-        return result
+        flash(result, "error")  # result from check_login should be a message string
+        return redirect(url_for('home'))
 
 # ===== Signup POST =====
 @app.route("/signup", methods=["POST"])
@@ -55,20 +64,29 @@ def signup():
     password = request.form.get("password")
     confirm_password = request.form.get("confirm_password")
 
+    # Password match check
     if password != confirm_password:
-        return "Passwords do not match."
+        flash("Passwords do not match.", "error")
+        return redirect(url_for("home"))
 
+    # Username exists check
     if User.query.filter_by(username=username).first():
-        return "Username already exists!"
-    if User.query.filter_by(email=email).first():
-        return "Email already registered!"
+        flash("Username already exists!", "error")
+        return redirect(url_for("home"))
 
+    # Email exists check
+    if User.query.filter_by(email=email).first():
+        flash("Email already registered!", "error")
+        return redirect(url_for("home"))
+
+    # Create user
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
     new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
-    return redirect(url_for('home'))
+    flash("Signup successful! Please log in.", "success")
+    return redirect(url_for("home"))
 
 # ===== Dashboard =====
 @app.route("/dashboard")
