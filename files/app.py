@@ -27,6 +27,15 @@ class User(db.Model):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
 
+#Trung
+class LoginState(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    failed_attempts = db.Column(db.Integer, default=0, nullable=False)
+    lock_until = db.Column(db.Float, default=0, nullable=False)  # epoch time
+
+
+#Terry
 # Create tables
 with app.app_context():
     db.create_all()
@@ -46,7 +55,11 @@ def login():
     password = request.form.get("password")
     user = User.query.filter_by(username=username).first()
 
-    result = check_login(username, password, user)
+
+    #Trung
+    result = check_login(username, password, user, db, LoginState)
+    
+    #Terry
     if result is None:
         session['user_id'] = user.id
         session['username'] = user.username
@@ -57,6 +70,7 @@ def login():
         return redirect(url_for('home'))
 
 # ===== Signup POST =====
+
 @app.route("/signup", methods=["POST"])
 def signup():
     username = request.form.get("username")
