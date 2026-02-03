@@ -56,17 +56,19 @@
 
                         <button type="submit" class="checkButton">Check for Breaches</button>
                     </form>
-
-                    <div id="loadingIndicator" class="loadingIndicator" style="display: none;">
-                        <div class="spinner"></div>
-                        <p>Checking for breaches...</p>
-                    </div>
                 </div>
             </div>
 
             <div class="rightColumn">
                 <div id="resultsPlaceholder" class="resultsPlaceholder">
                     <p>Results will appear here after checking for breaches</p>
+                </div>
+                <div id="loadingIndicator" class="loadingOverlay" style="display: none;">
+                    <div class="loadingContent">
+                        <div class="spinner"></div>
+                        <p>Checking for breaches...</p>
+                        <p class="loadingSubtext">This may take a few moments</p>
+                    </div>
                 </div>
                 <div id="resultsCard" class="resultsCard" style="display: none;">
                     <h3>Breach Results</h3>

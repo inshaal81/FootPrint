@@ -161,12 +161,26 @@ body {
   border-radius: 16px;
   padding: 48px;
   border: 1px solid var(--line);
+  min-height: 825px;
 }
 
 .inputCard,
 .resultsCard {
   background: transparent;
   padding: 0;
+}
+
+.inputCard {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.inputCard form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .statsCard,
@@ -250,22 +264,34 @@ body {
   transform: translateY(0);
 }
 
-.loadingIndicator {
+/* Loading Overlay - fills results section */
+.loadingOverlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--card);
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.loadingContent {
   text-align: center;
-  padding: 24px;
-  margin-top: 24px;
-  background: var(--bg);
-  border-radius: 8px;
+  padding: 40px;
 }
 
 .spinner {
-  border: 3px solid var(--line);
-  border-top: 3px solid var(--orange);
+  border: 4px solid var(--line);
+  border-top: 4px solid var(--orange);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+  margin: 0 auto 24px;
 }
 
 @keyframes spin {
@@ -273,15 +299,28 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-.loadingIndicator p {
+.loadingContent p {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.loadingSubtext {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* Make right column position relative for overlay */
+.rightColumn {
+  position: relative;
 }
 
 .resultsCard {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  width: 100%;
 }
 
 .resultsCard h3,
@@ -290,13 +329,6 @@ body {
   font-weight: 700;
   color: var(--text);
   margin-bottom: 20px;
-}
-
-.rightColumn {
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .resultsPlaceholder {
@@ -505,17 +537,21 @@ body.dark .checkButton:hover {
   background: #ffbc47;
 }
 
-body.dark .loadingIndicator {
-  background: #1a1a1a;
+body.dark .loadingOverlay {
+  background: #121212;
 }
 
-body.dark .loadingIndicator p {
-  color: #aaaaaa;
+body.dark .loadingContent p {
+  color: #ffffff;
+}
+
+body.dark .loadingSubtext {
+  color: #aaaaaa !important;
 }
 
 body.dark .spinner {
-  border: 3px solid #333;
-  border-top: 3px solid #ffd27f;
+  border: 4px solid #333;
+  border-top: 4px solid #ffd27f;
 }
 
 body.dark .resultsPlaceholder {
@@ -559,6 +595,333 @@ body.dark .footer {
   background-color: #161616;
   border-top: 1px solid #333;
   color: #aaaaaa;
+}
+
+/* ===== Password Breach Results ===== */
+.passwordBreachResult {
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.passwordBreachResult.breached {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fecaca;
+}
+
+.passwordBreachResult.breached.critical {
+  border-left: 4px solid #dc2626;
+}
+
+.passwordBreachResult.breached.high {
+  border-left: 4px solid #ea580c;
+}
+
+.passwordBreachResult.breached.medium {
+  border-left: 4px solid #f59e0b;
+}
+
+.passwordBreachResult.breached.low {
+  border-left: 4px solid #eab308;
+}
+
+.passwordBreachResult.safe {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #22c55e;
+}
+
+.passwordBreachHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.passwordBreachIcon {
+  font-size: 24px;
+}
+
+.passwordBreachHeader h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.passwordBreachResult.breached .passwordBreachHeader h4 {
+  color: #991b1b;
+}
+
+.passwordBreachResult.safe .passwordBreachHeader h4 {
+  color: #166534;
+}
+
+.passwordBreachMessage {
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.passwordBreachResult.breached .passwordBreachMessage {
+  color: #7f1d1d;
+}
+
+.passwordBreachResult.safe .passwordBreachMessage {
+  color: #14532d;
+}
+
+.passwordBreachAdvice {
+  font-size: 13px;
+  font-weight: 600;
+  color: #b91c1c;
+  margin-bottom: 12px;
+}
+
+.passwordBreachNote {
+  font-size: 12px;
+  color: #166534;
+  font-style: italic;
+}
+
+.passwordBreachSeverity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.severityLabel {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.severityBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.severityBadge.critical {
+  background: #dc2626;
+  color: #fff;
+}
+
+.severityBadge.high {
+  background: #ea580c;
+  color: #fff;
+}
+
+.severityBadge.medium {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.severityBadge.low {
+  background: #eab308;
+  color: #fff;
+}
+
+.emailBreachSection {
+  margin-top: 16px;
+}
+
+.emailBreachHeader {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Email Breach Notice (when API key is missing) */
+.emailBreachNotice {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.noticeHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.noticeIcon {
+  font-size: 24px;
+}
+
+.noticeHeader h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0;
+}
+
+.noticeMessage {
+  font-size: 14px;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.noticeDetail {
+  font-size: 13px;
+  color: #3b82f6;
+  font-style: italic;
+}
+
+/* Dark mode - Email Breach Notice */
+body.dark .emailBreachNotice {
+  background: linear-gradient(135deg, #1e293b, #1e3a5f);
+  border-color: #3b82f6;
+}
+
+body.dark .noticeHeader h4 {
+  color: #93c5fd;
+}
+
+body.dark .noticeMessage {
+  color: #bfdbfe;
+}
+
+body.dark .noticeDetail {
+  color: #60a5fa;
+}
+
+/* Dark mode - Password Breach Results */
+body.dark .passwordBreachResult.breached {
+  background: linear-gradient(135deg, #2a1a1a, #3a1a1a);
+  border-color: #5c2020;
+}
+
+body.dark .passwordBreachResult.breached .passwordBreachHeader h4 {
+  color: #fca5a5;
+}
+
+body.dark .passwordBreachResult.breached .passwordBreachMessage {
+  color: #fecaca;
+}
+
+body.dark .passwordBreachAdvice {
+  color: #f87171;
+}
+
+body.dark .passwordBreachResult.safe {
+  background: linear-gradient(135deg, #1a2a1a, #1a3a1a);
+  border-color: #2d5a2d;
+}
+
+body.dark .passwordBreachResult.safe .passwordBreachHeader h4 {
+  color: #86efac;
+}
+
+body.dark .passwordBreachResult.safe .passwordBreachMessage {
+  color: #bbf7d0;
+}
+
+body.dark .passwordBreachNote {
+  color: #4ade80;
+}
+
+body.dark .severityLabel {
+  color: #9ca3af;
+}
+
+body.dark .emailBreachHeader {
+  color: #e0e0e0;
+  border-bottom-color: #444;
+}
+
+/* ===== Email Breach Results (XposedOrNot format) ===== */
+.emailBreachSection {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.emailBreachHeader.breached {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.emailBreachHeader.breached h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0;
+}
+
+.breachIcon {
+  font-size: 24px;
+}
+
+.breachSummary {
+  font-size: 14px;
+  color: #7f1d1d;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.breachList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.breachTag {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.breachAdvice {
+  font-size: 13px;
+  color: #b91c1c;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Dark mode - Email Breach Results */
+body.dark .emailBreachSection {
+  background: linear-gradient(135deg, #2a1a1a, #3a1a1a);
+  border-color: #5c2020;
+}
+
+body.dark .emailBreachHeader.breached h4 {
+  color: #fca5a5;
+}
+
+body.dark .breachSummary {
+  color: #fecaca;
+}
+
+body.dark .breachTag {
+  background: #b91c1c;
+  box-shadow: 0 2px 4px rgba(185, 28, 28, 0.4);
+}
+
+body.dark .breachAdvice {
+  color: #f87171;
 }
 
 @media (max-width: 768px) {

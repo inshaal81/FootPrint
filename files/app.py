@@ -1,9 +1,13 @@
-#Terry 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+#Terry
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
-from security import check_login  # <-- import your login check logic
-import os   # ✅ added
+import os
+import re
+import hashlib
+import requests  # For HIBP API calls
+from datetime import datetime, timedelta
 
 #Terry
 # ===== Create Flask app =====
@@ -15,6 +19,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-only-secret-key")
 if app.config.get("ENV") == "production" and app.secret_key == "dev-only-secret":
     raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
 
+#Inshaal - CSRF Protection
+csrf = CSRFProtect(app)
+
 # ===== Configure and link the database =====
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,17 +32,58 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password = db.Column(db.String(256), nullable=False)
 
-#Trung
-class LoginState(db.Model):
+
+#Inshaal - LoginAttempt model (persistent rate limiting)
+class LoginAttempt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    failed_attempts = db.Column(db.Integer, default=0, nullable=False)
-    lock_until = db.Column(db.Float, default=0, nullable=False)  # epoch time
+    username = db.Column(db.String(150), nullable=False, index=True)
+    failed_count = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
+    last_attempt = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-#Terry
+#Inshaal - Input Validation
+def validate_email(email):
+    """Validate email format."""
+    if not email or len(email) > 254:
+        return False, "Email is required and must be under 254 characters."
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, email):
+        return False, "Invalid email format."
+    return True, ""
+
+
+def validate_username(username):
+    """Validate username - alphanumeric, underscore, hyphen only."""
+    if not username:
+        return False, "Username is required."
+    if len(username) < 3 or len(username) > 30:
+        return False, "Username must be 3-30 characters."
+    pattern = r'^[a-zA-Z0-9_-]+$'
+    if not re.match(pattern, username):
+        return False, "Username can only contain letters, numbers, underscores, and hyphens."
+    return True, ""
+
+
+def validate_password(password):
+    """Validate password strength."""
+    if not password:
+        return False, "Password is required."
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters."
+    if len(password) > 128:
+        return False, "Password must be under 128 characters."
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least one lowercase letter."
+    if not re.search(r'\d', password):
+        return False, "Password must contain at least one number."
+    return True, ""
+
+
 # Create tables
 with app.app_context():
     db.create_all()
@@ -48,35 +96,97 @@ def home():
         return redirect(url_for('dashboard'))
     return render_template("index.html")
 
+# ===== Rate Limiting Constants =====
+MAX_ATTEMPTS = 3
+LOCK_TIME = 300  # 5 minutes in seconds
+
+
 # ===== Login POST with security checks =====
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    from werkzeug.security import check_password_hash
+
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "")
+
+    if not username or not password:
+        flash("Username and password are required.", "error")
+        return redirect(url_for('home'))
+
+    # Get or create login attempt record
+    attempt = LoginAttempt.query.filter_by(username=username).first()
+    if not attempt:
+        attempt = LoginAttempt(username=username, failed_count=0)
+        db.session.add(attempt)
+
+    current_time = datetime.utcnow()
+
+    # Check if account is locked
+    if attempt.locked_until and current_time < attempt.locked_until:
+        remaining = int((attempt.locked_until - current_time).total_seconds())
+        flash(f"Account locked. Try again in {remaining} seconds.", "error")
+        return redirect(url_for('home'))
+
+    # Clear lock if expired
+    if attempt.locked_until and current_time >= attempt.locked_until:
+        attempt.failed_count = 0
+        attempt.locked_until = None
+
+    # Check credentials
     user = User.query.filter_by(username=username).first()
 
+    if user and check_password_hash(user.password, password):
+        # Successful login - reset attempts
+        attempt.failed_count = 0
+        attempt.locked_until = None
+        db.session.commit()
 
-    #Trung
-    result = check_login(username, password, user, db, LoginState)
-    
-    #Terry
-    if result is None:
         session['user_id'] = user.id
         session['username'] = user.username
         flash("Login successful!", "success")
         return redirect(url_for('dashboard'))
+
+    # Failed login - increment counter
+    attempt.failed_count += 1
+    attempt.last_attempt = current_time
+
+    if attempt.failed_count >= MAX_ATTEMPTS:
+        attempt.locked_until = current_time + timedelta(seconds=LOCK_TIME)
+        db.session.commit()
+        flash(f"Account locked for {LOCK_TIME // 60} minutes due to multiple failed attempts.", "error")
     else:
-        flash(result, "error")  # result from check_login should be a message string
-        return redirect(url_for('home'))
+        db.session.commit()
+        remaining_attempts = MAX_ATTEMPTS - attempt.failed_count
+        flash(f"Invalid credentials. {remaining_attempts} attempt(s) remaining.", "error")
+
+    return redirect(url_for('home'))
 
 # ===== Signup POST =====
 
 @app.route("/signup", methods=["POST"])
 def signup():
-    username = request.form.get("username")
-    email = request.form.get("email")
-    password = request.form.get("password")
-    confirm_password = request.form.get("confirm_password")
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    # Validate username
+    valid, error = validate_username(username)
+    if not valid:
+        flash(error, "error")
+        return redirect(url_for("home"))
+
+    # Validate email
+    valid, error = validate_email(email)
+    if not valid:
+        flash(error, "error")
+        return redirect(url_for("home"))
+
+    # Validate password
+    valid, error = validate_password(password)
+    if not valid:
+        flash(error, "error")
+        return redirect(url_for("home"))
 
     # Password match check
     if password != confirm_password:
@@ -125,3 +235,132 @@ def login_modal():
 @app.route("/signup_modal")
 def signup_modal():
     return render_template("signup.html")
+
+
+#Inshaal - XposedOrNot API Proxy (FREE email breach checking)
+@app.route("/api/check-breach", methods=["POST"])
+@csrf.exempt  # Exempt from CSRF - uses session auth + JSON body
+def check_breach():
+    """
+    Backend proxy for XposedOrNot API.
+    FREE API - no API key required.
+    Avoids CORS issues by making the API call server-side.
+    """
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    email = data.get("email", "").strip().lower() if data else ""
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    # Basic email validation
+    if "@" not in email or "." not in email.split("@")[-1]:
+        return jsonify({"error": "Invalid email format"}), 400
+
+    try:
+        api_url = f"https://api.xposedornot.com/v1/check-email/{email}"
+        headers = {
+            "User-Agent": "FootprintApp/1.0"
+        }
+
+        response = requests.get(api_url, headers=headers, timeout=10)
+
+        if response.status_code == 404:
+            # No breaches found - this is good news
+            return jsonify({"breaches": [], "email": email, "breached": False}), 200
+        elif response.status_code == 429:
+            return jsonify({"error": "Rate limit exceeded. Please try again later."}), 429
+        elif response.status_code == 200:
+            # XposedOrNot returns: {"breaches": [["Adobe", "LinkedIn", ...]]}
+            data = response.json()
+            # Extract breaches from nested array
+            breaches_list = data.get("breaches", [[]])
+            breach_names = breaches_list[0] if breaches_list and len(breaches_list) > 0 else []
+            return jsonify({
+                "breaches": breach_names,
+                "email": email,
+                "breached": len(breach_names) > 0,
+                "breach_count": len(breach_names)
+            }), 200
+        else:
+            return jsonify({"error": f"API error: {response.status_code}"}), 502
+
+    except requests.Timeout:
+        return jsonify({"error": "Request timed out. Please try again."}), 504
+    except requests.RequestException as e:
+        return jsonify({"error": "Unable to check breaches at this time."}), 503
+
+
+#Inshaal - Pwned Passwords API (k-anonymity model)
+@app.route("/api/check-password", methods=["POST"])
+@csrf.exempt  # Exempt from CSRF - uses session auth + JSON body
+def check_password_pwned():
+    """
+    Check if password has been exposed in data breaches.
+    Uses k-anonymity: only first 5 chars of SHA-1 hash are sent to API.
+    """
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    password = data.get("password", "") if data else ""
+
+    if not password:
+        return jsonify({"error": "Password is required"}), 400
+
+    try:
+        # Hash password with SHA-1 (only for breach checking, NOT storage)
+        sha1_hash = hashlib.sha1(password.encode('utf-8')).hexdigest().upper()
+        prefix = sha1_hash[:5]
+        suffix = sha1_hash[5:]
+
+        # Query HIBP Pwned Passwords API (no API key needed)
+        api_url = f"https://api.pwnedpasswords.com/range/{prefix}"
+        headers = {"User-Agent": "FootprintApp/1.0"}
+
+        response = requests.get(api_url, headers=headers, timeout=5)
+
+        if response.status_code == 200:
+            # Parse response - each line is "HASH_SUFFIX:COUNT"
+            for line in response.text.splitlines():
+                if ':' not in line:
+                    continue
+                hash_suffix, count = line.split(':', 1)
+                if suffix == hash_suffix:
+                    count = int(count)
+                    # Determine severity
+                    if count > 100000:
+                        severity = "critical"
+                    elif count > 10000:
+                        severity = "high"
+                    elif count > 1000:
+                        severity = "medium"
+                    else:
+                        severity = "low"
+
+                    return jsonify({
+                        "breached": True,
+                        "count": count,
+                        "severity": severity,
+                        "message": f"This password has been exposed {count:,} times in data breaches."
+                    })
+
+            # Password not found in breaches
+            return jsonify({
+                "breached": False,
+                "count": 0,
+                "message": "This password has not been found in known data breaches."
+            })
+        else:
+            return jsonify({"error": f"API error: {response.status_code}"}), 502
+
+    except requests.Timeout:
+        return jsonify({"error": "Request timed out. Please try again."}), 504
+    except requests.RequestException:
+        return jsonify({"error": "Unable to check password at this time."}), 503
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)
