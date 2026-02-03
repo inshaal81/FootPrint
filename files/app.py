@@ -3,14 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
-import os
-import re
-import hashlib
-import requests  # For HIBP API calls
-from datetime import datetime, timedelta
+from security import check_login  # <-- import your login check logic
+from flask import jsonify
+import json, datetime
 
-#Terry
-# ===== Create Flask app =====
+# ✅ Create ONE Flask app
 app = Flask(__name__, static_folder='static')
 
 # ===== Secure Secret Key =====
@@ -85,9 +82,68 @@ def validate_password(password):
     return True, ""
 
 
+class RemovalProvider(db.Model):
+    id = db.Column(db.String(50), primary_key=True)  
+    name = db.Column(db.String(120), nullable=False)
+    opt_out_url = db.Column(db.String(300), nullable=False)
+    eta = db.Column(db.String(50), nullable=True)
+    steps_json = db.Column(db.Text, nullable=True)   
+
+class RemovalAction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)        
+    provider_id = db.Column(db.String(50), nullable=False)   
+    status = db.Column(db.String(30), nullable=False)        
+    notes = db.Column(db.Text, nullable=True)                
+    created_at = db.Column(db.String(40), nullable=False)  
+
+
+class RemovalProvider(db.Model):
+    id = db.Column(db.String(50), primary_key=True)  
+    name = db.Column(db.String(120), nullable=False)
+    opt_out_url = db.Column(db.String(300), nullable=False)
+    eta = db.Column(db.String(50), nullable=True)
+    steps_json = db.Column(db.Text, nullable=True)   
+
+class RemovalAction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)        
+    provider_id = db.Column(db.String(50), nullable=False)   
+    status = db.Column(db.String(30), nullable=False)        
+    notes = db.Column(db.Text, nullable=True)                
+    created_at = db.Column(db.String(40), nullable=False)  
+
+
 # Create tables
 with app.app_context():
-    db.create_all()
+    db.create_all() 
+    if RemovalProvider.query.count() == 0:
+        providers = [
+            RemovalProvider(
+                id="whitepages",
+                name="Whitepages",
+                opt_out_url="https://www.whitepages.com/suppression-requests",
+                eta="7–14 days",
+                steps_json=json.dumps([
+                    "Open the suppression request page",
+                    "Search for your listing",
+                    "Submit the request and confirm if prompted"
+                ])
+            ),
+            RemovalProvider(
+                id="spokeo",
+                name="Spokeo",
+                opt_out_url="https://www.spokeo.com/optout",
+                eta="3–10 days",
+                steps_json=json.dumps([
+                    "Open the opt-out page",
+                    "Find your profile",
+                    "Submit request and verify via email"
+                ])
+            )
+        ]
+        db.session.add_all(providers)
+        db.session.commit()
 
 
 # ===== Home =====
@@ -236,6 +292,85 @@ def login_modal():
 @app.route("/signup_modal")
 def signup_modal():
     return render_template("signup.html")
+
+#GET 
+@app.route("/api/removal/providers", methods=["GET"])
+def api_removal_providers():
+    # Only allow logged-in users to access this API
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    providers = RemovalProvider.query.all()
+
+    # Convert DB rows into JSON objects for the frontend
+    return jsonify([
+        {
+            "id": p.id,
+            "name": p.name,
+            "optOutUrl": p.opt_out_url,
+            "eta": p.eta,
+            "steps": json.loads(p.steps_json) if p.steps_json else []
+        } for p in providers
+    ])
+
+#POST
+@app.route("/api/removal/action", methods=["POST"])
+def api_removal_action():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(force=True)
+    provider_id = data.get("provider_id")
+    status = data.get("status")
+    notes = data.get("notes", "")
+
+    # Validate request
+    if not provider_id or not status:
+        return jsonify({"error": "provider_id and status required"}), 400
+
+    if status not in ["Not started", "Submitted", "Completed"]:
+        return jsonify({"error": "invalid status"}), 400
+
+    action = RemovalAction(
+        user_id=session["user_id"],
+        provider_id=provider_id,
+        status=status,
+        notes=notes,
+        created_at=datetime.datetime.utcnow().isoformat()
+    )
+
+    db.session.add(action)
+    db.session.commit()
+
+    return jsonify({"ok": True})
+
+#SUMMARY
+@app.route("/api/removal/summary", methods=["GET"])
+def api_removal_summary():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    actions = (RemovalAction.query
+               .filter_by(user_id=session["user_id"])
+               .order_by(RemovalAction.id.desc())
+               .all())
+
+    submitted = sum(1 for a in actions if a.status == "Submitted")
+    completed = sum(1 for a in actions if a.status == "Completed")
+
+    return jsonify({
+        "submitted": submitted,
+        "completed": completed,
+        "actions": [
+            {
+                "provider_id": a.provider_id,
+                "status": a.status,
+                "notes": a.notes,
+                "created_at": a.created_at
+            } for a in actions
+        ]
+    })
+
 
 
 #Inshaal - XposedOrNot API Proxy (FREE email breach checking)
