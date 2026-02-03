@@ -19,8 +19,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-only-secret-key")
 if app.config.get("ENV") == "production" and app.secret_key == "dev-only-secret":
     raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
 
-#Inshaal - CSRF Protection
-csrf = CSRFProtect(app)
+#Terry - modified (made more modular and flexible for larger Flask apps)
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 # ===== Configure and link the database =====
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
