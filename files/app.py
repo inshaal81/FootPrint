@@ -3,11 +3,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
-from security import check_login  # <-- import your login check logic
-from flask import jsonify
-import json, datetime
+import os
+import re
+import hashlib
+import requests  # For HIBP API calls
+from datetime import datetime, timedelta
 
-# ✅ Create ONE Flask app
+
+#  Create ONE Flask app (Terry)
 app = Flask(__name__, static_folder='static')
 
 # ===== Secure Secret Key =====
@@ -80,8 +83,7 @@ def validate_password(password):
     if not re.search(r'\d', password):
         return False, "Password must contain at least one number."
     return True, ""
-
-
+#Khang 
 class RemovalProvider(db.Model):
     id = db.Column(db.String(50), primary_key=True)  
     name = db.Column(db.String(120), nullable=False)
@@ -112,7 +114,7 @@ class RemovalAction(db.Model):
     status = db.Column(db.String(30), nullable=False)        
     notes = db.Column(db.Text, nullable=True)                
     created_at = db.Column(db.String(40), nullable=False)  
-
+#======
 
 # Create tables
 with app.app_context():
