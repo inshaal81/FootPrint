@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
+import json
 import os
 import re
 import hashlib
@@ -99,22 +100,6 @@ class RemovalAction(db.Model):
     notes = db.Column(db.Text, nullable=True)                
     created_at = db.Column(db.String(40), nullable=False)  
 
-
-class RemovalProvider(db.Model):
-    id = db.Column(db.String(50), primary_key=True)  
-    name = db.Column(db.String(120), nullable=False)
-    opt_out_url = db.Column(db.String(300), nullable=False)
-    eta = db.Column(db.String(50), nullable=True)
-    steps_json = db.Column(db.Text, nullable=True)   
-
-class RemovalAction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)        
-    provider_id = db.Column(db.String(50), nullable=False)   
-    status = db.Column(db.String(30), nullable=False)        
-    notes = db.Column(db.Text, nullable=True)                
-    created_at = db.Column(db.String(40), nullable=False)  
-#======
 
 # Create tables
 with app.app_context():
@@ -338,7 +323,8 @@ def api_removal_action():
         provider_id=provider_id,
         status=status,
         notes=notes,
-        created_at=datetime.datetime.utcnow().isoformat()
+        created_at=datetime.utcnow().isoformat()
+
     )
 
     db.session.add(action)
