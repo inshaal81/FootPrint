@@ -84,6 +84,7 @@ def validate_password(password):
     if not re.search(r'\d', password):
         return False, "Password must contain at least one number."
     return True, ""
+
 #Khang 
 class RemovalProvider(db.Model):
     id = db.Column(db.String(50), primary_key=True)  
@@ -99,6 +100,15 @@ class RemovalAction(db.Model):
     status = db.Column(db.String(30), nullable=False)        
     notes = db.Column(db.Text, nullable=True)                
     created_at = db.Column(db.String(40), nullable=False)  
+
+#Khang (review model for user feedback on providers)
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False, index=True)
+    rating = db.Column(db.Integer, nullable=True)
+    comment = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
 # Create tables
@@ -359,6 +369,24 @@ def api_removal_summary():
         ]
     })
 
+# Khang (add GET route for reviews)
+@app.route("/api/reviews", methods=["GET"])
+def get_reviews():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    reviews = Review.query.order_by(Review.created_at.desc()).all()
+
+    return jsonify([
+        {
+            "id": r.id,
+            "user_id": r.user_id,
+            "rating": r.rating,
+            "comment": r.comment,
+            "created_at": r.created_at.isoformat() if r.created_at else None
+        }
+        for r in reviews
+    ])
 
 
 #Inshaal - XposedOrNot API Proxy (FREE email breach checking)
