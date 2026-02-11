@@ -1,5 +1,5 @@
 #Terry
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
@@ -9,6 +9,11 @@ import re
 import hashlib
 import requests  # For HIBP API calls
 from datetime import datetime, timedelta
+#Terry added
+from tracker.activity import log_activity
+from database import get_db
+
+
 
 
 #  Create ONE Flask app (Terry)
@@ -24,9 +29,17 @@ if app.config.get("ENV") == "production" and app.secret_key == "dev-only-secret"
 csrf = CSRFProtect()
 csrf.init_app(app)
 
+#Terry modified
 # ===== Configure and link the database =====
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app.config["DATABASE"] = os.path.join(basedir, "instance", "data.db")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = \
+    'sqlite:///' + app.config["DATABASE"]
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 # ===== User model =====
@@ -187,7 +200,10 @@ def login():
 
         session['user_id'] = user.id
         session['username'] = user.username
+        #added
+        log_activity("login")
         flash("Login successful!", "success")
+
         return redirect(url_for('dashboard'))
 
     # Failed login - increment counter
@@ -268,6 +284,8 @@ def dashboard():
 # ===== Logout =====
 @app.route("/logout")
 def logout():
+    #added
+    log_activity("logout")
     session.clear()
     return redirect(url_for('home'))
 
@@ -484,6 +502,24 @@ def check_password_pwned():
         return jsonify({"error": "Request timed out. Please try again."}), 504
     except requests.RequestException:
         return jsonify({"error": "Unable to check password at this time."}), 503
+
+#Terry added
+
+@app.route("/scan", methods=["POST"])
+def scan():
+    domain = request.form["domain"]
+
+    log_activity("run_scan", domain)
+    return redirect(url_for("dashboard"))
+    # scan logic here
+
+@app.teardown_appcontext
+def close_db(exception=None):
+    db_conn = g.pop("db", None)
+
+    if db_conn is not None:
+        db_conn.close()
+
 
 
 if __name__ == "__main__":
