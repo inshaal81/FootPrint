@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>footPrint - About Us</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <div class="topContent">
+    <div class="header">
+        <div class="logo">
+        <a href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='img/fplogo.png') }}" alt="footPrint logo">
+        </a>
+        </div>
+
+      <div class="headerItems">
+        <div>
+          <ul class="headerLinks">
+            <li><a href="{{ url_for('about') }}" class="aboutUs">About Us</a></li>
+          </ul>
+        </div>
+
+        <button id="themeToggle">Theme Toggle</button>
+        <button id="logInBtn" type="submit">Log In</button>
+      </div>
+    </div>
+
+    <!-- About Us Content -->
+    <div class="topSection">
+      <div class="banner">About Us</div>
+
+      <div class="allText">
+        <div class="title">
+          We built a privacy dashboard that helps people take control of their digital footprint.
+        </div>
+
+        <div class="subtextOne">
+          Our digital lives leave behind a trail of personal data—emails, phone numbers, trackers, and browsing activity—often without us noticing.
+          That’s why we created <span class="highlight">Footprint</span>, a Digital Privacy Dashboard that turns confusing privacy info into clear, actionable insights.
+          With Footprint, you can check whether your email or phone number has appeared in a data breach, see the cookies and trackers following you across websites,
+          and visualize your “digital shadow”—the companies that may be holding your data. We also generate a simple privacy risk score to help you understand your exposure at a glance.
+        </div>
+
+        <div class="subtextOne">
+          Always happy to hear feedback or suggestions at
+          <a href="mailto:footprint.teammm@gmail.com" class="highlight">footprint.teammm@gmail.com</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Terry-->
+  <!-- ===== Login Modal ===== -->
+  <div id="loginModal" class="modal auth-modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+
+      <!-- Flash messages -->
+      <div class="modalFlashes">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <form class="login-form" action="{{ url_for('login') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
+        <button type="submit">Login</button>
+      </form>
+
+      <p class="modal-bottom-text">
+        Don’t have an account?
+        <a href="#" id="openSignupLink">Create one</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== Signup Modal ===== -->
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+
+      <form action="{{ url_for('signup') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required minlength="8">
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" name="confirm_password" required minlength="8">
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer">
+    Copyright @ footPrint 2025
+  </div>
+
+  <!--This is will make the login to POPUP-->
+  <div id="popupContainer"></div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

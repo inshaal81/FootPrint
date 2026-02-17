@@ -14,8 +14,17 @@
         <div class="logo">
             <img src="{{ url_for('static', filename='img/fplogo.png') }}" alt="Logo">
         </div>
-
+        
         <div class="headerItems">
+
+            <!--Trung Nguyen-->
+            <div>
+                <ul class="headerLinks">
+                    <li><a href="{{ url_for('about') }}" class="aboutUs">About Us</a></li>
+                </ul>
+           </div>
+
+
             <button id="themeToggle" type="button">Theme Toggle</button>
             <button id="logOutBtn" type="button">Log Out</button>
         </div>

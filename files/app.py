@@ -200,6 +200,16 @@ def home():
         return redirect(url_for('dashboard'))
     return render_template("index.html")
 
+#Trung Nguyen
+#----- About Us =====
+@app.route("/about")
+def about():
+    return render_template("aboutus.html")
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+#Terry
 # ===== Rate Limiting Constants =====
 MAX_ATTEMPTS = 3
 LOCK_TIME = 300  # 5 minutes in seconds

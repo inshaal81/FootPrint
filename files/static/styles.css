@@ -55,7 +55,7 @@ body {
   width: 135px;
   object-fit: contain;
   position: relative;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .headerLogo {
@@ -534,15 +534,26 @@ body {
 }
 
 /* Footer */
+html, body {
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .footer {
   display: flex;
   justify-content: center;
+  align-items: center;
   background-color: var(--line);
   border-top: 1px solid var(--lightgray);
   color: var(--muted);
   font-weight: 600;
   padding: 30px;
-  margin-top: 30px;
+  margin-top: auto;  
+  width: 100%;
 }
 
 /* Dark mode */
