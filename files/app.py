@@ -20,10 +20,11 @@ from database import get_db
 app = Flask(__name__, static_folder='static')
 
 # ===== Secure Secret Key =====
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-only-secret-key")
-
-if app.config.get("ENV") == "production" and app.secret_key == "dev-only-secret":
-    raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+if not app.secret_key:
+    if os.environ.get("RENDER"):
+        raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
+    app.secret_key = "dev-only-secret-key-local-only"
 
 #Terry - modified (made more modular and flexible for larger Flask apps)
 csrf = CSRFProtect()
@@ -31,13 +32,17 @@ csrf.init_app(app)
 
 #Terry modified
 # ===== Configure and link the database =====
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-app.config["DATABASE"] = os.path.join(basedir, "instance", "data.db")
-
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'sqlite:///' + app.config["DATABASE"]
-
+# Database configuration - PostgreSQL (production) or SQLite (local dev)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Render uses 'postgres://' but SQLAlchemy requires 'postgresql://'
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config["DATABASE"] = os.path.join(basedir, "instance", "data.db")
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config["DATABASE"]
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -551,4 +556,6 @@ def close_db(exception=None):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, host="0.0.0.0", port=port)

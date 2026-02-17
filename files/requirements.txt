@@ -15,5 +15,8 @@ email-validator>=2.0,<3
 requests>=2.31,<3
 anyio>=4.0,<5
 
+# PostgreSQL driver for Render deployment
+psycopg2-binary>=2.9,<3
+
 # Only keep this IF your code imports apsw
 apsw>=3.50.0
