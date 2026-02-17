@@ -12,10 +12,6 @@
   A data breach detection web application that helps users discover if their personal information has been compromised in known data breaches.
 </p>
 
-<p align="center">
-  <a href="https://github.com/inshaal81/FootPrint.git">View Repository</a>
-</p>
-
 ---
 
 ## Table of Contents
