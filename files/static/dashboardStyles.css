@@ -131,10 +131,10 @@ body {
 
 .dashboardContainer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   flex: 1;
-  padding: 40px 20px;
+  padding: 70px 20px 40px 20px;
   position: relative;
 }
 
@@ -924,24 +924,140 @@ body.dark .breachAdvice {
   color: #f87171;
 }
 
-/* ===== Data Removal Protocol Section ===== */
-#removalProtocol {
+/* Breach List Toggle */
+.hiddenBreaches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-basis: 100%;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+  margin-top: 0;
+}
+
+.hiddenBreaches.expanded {
+  max-height: 2000px;
+  opacity: 1;
+  margin-top: 8px;
+  transition: max-height 0.5s ease-in, opacity 0.3s ease-in, margin 0.3s ease-in;
+}
+
+.breachToggleBtn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.breachToggleBtn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(244, 122, 20, 0.05);
+}
+
+/* Dark mode - Breach Toggle */
+body.dark .breachToggleBtn {
+  border-color: #555;
+  color: #aaa;
+}
+
+body.dark .breachToggleBtn:hover {
+  border-color: #ffd27f;
+  color: #ffd27f;
+  background: rgba(255, 210, 127, 0.1);
+}
+
+/* ===== Data Removal Protocol Summary (Left Column) ===== */
+.removalProtocolSummary {
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid var(--line);
 }
 
-#removalProtocol h3 {
+.removalProtocolSummary h3 {
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 8px;
 }
 
-#removalProtocol .subtitle {
+.removalProtocolSummary .subtitle {
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 20px;
+}
+
+/* ===== Providers Dashboard (Separate Section) ===== */
+.providersDashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 32px;
+  padding: 32px;
+  border: 2px solid var(--orange);
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.providersBody {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid var(--line);
+}
+
+.providersBody h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.providersBody .subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* Dark mode - Providers Dashboard */
+body.dark .providersDashboard {
+  background: #0a0a0a;
+  border-color: #ffd27f;
+}
+
+body.dark .providersBody {
+  background: #121212;
+  border-color: #444;
+}
+
+body.dark .providersBody h3 {
+  color: #ffffff;
+}
+
+body.dark .providersBody .subtitle {
+  color: #aaaaaa;
+}
+
+body.dark .removalProtocolSummary {
+  border-top-color: #444;
+}
+
+body.dark .removalProtocolSummary h3 {
+  color: #ffffff;
+}
+
+body.dark .removalProtocolSummary .subtitle {
+  color: #aaaaaa;
 }
 
 .removalLoading {
@@ -991,13 +1107,44 @@ body.dark .breachAdvice {
   border-radius: 12px;
 }
 
+/* Removal section toggle button */
+.breachTagList .breachToggleBtn {
+  flex-basis: 100%;
+  margin-top: 6px;
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.breachTagList .breachToggleBtn:hover {
+  border-color: #b45309;
+  color: #78350f;
+  background: rgba(217, 119, 6, 0.1);
+}
+
+body.dark .breachTagList .breachToggleBtn {
+  border-color: #b45309;
+  color: #fcd34d;
+}
+
+body.dark .breachTagList .breachToggleBtn:hover {
+  border-color: #fcd34d;
+  color: #fef3c7;
+  background: rgba(252, 211, 77, 0.1);
+}
+
+/* Provider Cards Container */
+#removalProviders {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
 /* Provider Cards */
 .providerCard {
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 16px;
-  margin-bottom: 12px;
   position: relative;
   transition: box-shadow 0.2s;
 }
@@ -1126,7 +1273,7 @@ body.dark .breachAdvice {
 }
 
 /* Summary Section */
-#removalProtocol h4 {
+.removalProtocolSummary h4 {
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
@@ -1184,18 +1331,9 @@ body.dark .breachAdvice {
   color: #16a34a;
 }
 
-/* Dark Mode - Removal Protocol */
-body.dark #removalProtocol {
-  border-top-color: #444;
-}
-
-body.dark #removalProtocol h3,
-body.dark #removalProtocol h4 {
+/* Dark Mode - Removal Protocol Summary */
+body.dark .removalProtocolSummary h4 {
   color: #ffffff;
-}
-
-body.dark #removalProtocol .subtitle {
-  color: #aaaaaa;
 }
 
 body.dark .removalError {
@@ -1304,7 +1442,7 @@ body.dark .summaryCompleted {
   }
 
   .dashboardContainer {
-    padding: 20px;
+    padding: 60px 20px 20px 20px;
     min-height: auto;
   }
 
@@ -1333,5 +1471,14 @@ body.dark .summaryCompleted {
     position: static;
     align-self: flex-start;
     margin-top: 10px;
+  }
+
+  .providersDashboard {
+    margin-top: 24px;
+    padding: 20px;
+  }
+
+  .providersBody {
+    padding: 20px;
   }
 }

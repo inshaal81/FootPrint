@@ -66,6 +66,17 @@
                         <button type="submit" class="checkButton">Check for Breaches</button>
                     </form>
                 </div>
+
+                <!-- Data Removal Protocol Summary (in left column) -->
+                <div id="removalProtocolSummary" class="removalProtocolSummary" style="display: none;">
+                    <h3>Data Removal Protocol</h3>
+                    <p class="subtitle">
+                        These data brokers may also have your information. Use the official opt-out links and track your progress.
+                    </p>
+                    <div id="removalBreachesList"></div>
+                    <h4 style="margin-top: 15px;">Summary</h4>
+                    <div id="removalSummary">No actions yet.</div>
+                </div>
             </div>
 
             <div class="rightColumn">
@@ -82,19 +93,16 @@
                 <div id="resultsCard" class="resultsCard" style="display: none;">
                     <h3>Breach Results</h3>
                     <div id="breachResults"></div>
-
-                    <div id="removalProtocol" style="margin-top: 20px; display:none;">
-                        <h3>Data Removal Protocol</h3>
-                        <p class="subtitle">
-                        These data brokers may also have your information. Use the official opt-out links and track your progress.
-                        </p>
-
-                        <div id="removalProviders"></div>
-
-                        <h4 style="margin-top: 15px;">Summary</h4>
-                        <pre id="removalSummary">No actions yet.</pre>
-                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Data Removal Providers Dashboard (separate section) -->
+        <div id="providersDashboard" class="providersDashboard" style="display: none;">
+            <div class="providersBody">
+                <h3>Data Removal Actions</h3>
+                <p class="subtitle">Complete these opt-out requests to remove your data from broker sites.</p>
+                <div id="removalProviders"></div>
             </div>
         </div>
     </div>

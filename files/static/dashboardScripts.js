@@ -246,9 +246,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="breachList">
                     `;
 
-                    const breachesHTML = result.breaches.map(breachName => {
+                    const MAX_VISIBLE_BREACHES = 15;
+                    const totalBreaches = result.breaches.length;
+                    const visibleBreaches = result.breaches.slice(0, MAX_VISIBLE_BREACHES);
+                    const hiddenBreaches = result.breaches.slice(MAX_VISIBLE_BREACHES);
+
+                    let breachesHTML = visibleBreaches.map(breachName => {
                         return `<span class="breachTag">${breachName}</span>`;
                     }).join('');
+
+                    if (hiddenBreaches.length > 0) {
+                        const sanitizedEmail = result.email.replace(/[^a-zA-Z0-9]/g, '');
+                        breachesHTML += `
+                            <div class="hiddenBreaches" id="hiddenBreaches-${sanitizedEmail}">
+                                ${hiddenBreaches.map(b => `<span class="breachTag">${b}</span>`).join('')}
+                            </div>
+                            <button class="breachToggleBtn" data-target="hiddenBreaches-${sanitizedEmail}" data-hidden-count="${hiddenBreaches.length}">
+                                Show ${hiddenBreaches.length} more
+                            </button>
+                        `;
+                    }
 
                     resultsHTML += breachesHTML + `
                         </div>
@@ -259,6 +276,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         breachResults.innerHTML = resultsHTML;
+
+        // Add toggle listeners for breach expand/collapse
+        document.querySelectorAll('.breachToggleBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.target.dataset.target;
+                const hiddenCount = e.target.dataset.hiddenCount;
+                const container = document.getElementById(targetId);
+
+                if (container.classList.contains('expanded')) {
+                    container.classList.remove('expanded');
+                    e.target.textContent = `Show ${hiddenCount} more`;
+                } else {
+                    container.classList.add('expanded');
+                    e.target.textContent = 'Show less';
+                }
+            });
+        });
 
         // Scroll to results
         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -302,14 +336,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function renderRemovalProtocol(breaches) {
-        const section = document.getElementById("removalProtocol");
-        const providersEl = document.getElementById("removalProviders");
+        // New structure: breaches + summary in left column, providers in separate dashboard
+        const summarySection = document.getElementById("removalProtocolSummary");
+        const breachesListEl = document.getElementById("removalBreachesList");
         const summaryEl = document.getElementById("removalSummary");
+        const providersDashboard = document.getElementById("providersDashboard");
+        const providersEl = document.getElementById("removalProviders");
 
-        if (!section || breaches.length === 0) return;
+        if (breaches.length === 0) return;
 
-        section.style.display = "block";
-        providersEl.innerHTML = '<p class="removalLoading">Loading removal options...</p>';
+        // Show the left column summary section
+        if (summarySection) summarySection.style.display = "block";
+        // Show the providers dashboard
+        if (providersDashboard) providersDashboard.style.display = "block";
+
+        if (breachesListEl) {
+            breachesListEl.innerHTML = '<p class="removalLoading">Loading...</p>';
+        }
+        if (providersEl) {
+            providersEl.innerHTML = '<p class="removalLoading">Loading removal options...</p>';
+        }
 
         try {
             // Fetch providers and summary in parallel
@@ -329,17 +375,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Display breach names the user was found in
-            let breachListHTML = `
-                <div class="breachesFound">
-                    <h4>Your Data Found In:</h4>
-                    <div class="breachTagList">
-                        ${breaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('')}
-                    </div>
-                </div>
-            `;
+            // Display breach names in the LEFT column (with toggle for long lists)
+            const MAX_VISIBLE_REMOVAL_BREACHES = 15;
+            const visibleRemovalBreaches = breaches.slice(0, MAX_VISIBLE_REMOVAL_BREACHES);
+            const hiddenRemovalBreaches = breaches.slice(MAX_VISIBLE_REMOVAL_BREACHES);
 
-            // Render provider cards with status dropdowns
+            let breachTagsHTML = visibleRemovalBreaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('');
+
+            if (hiddenRemovalBreaches.length > 0) {
+                breachTagsHTML += `
+                    <div class="hiddenBreaches" id="hiddenRemovalBreaches">
+                        ${hiddenRemovalBreaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('')}
+                    </div>
+                    <button class="breachToggleBtn removalToggleBtn" data-target="hiddenRemovalBreaches" data-hidden-count="${hiddenRemovalBreaches.length}">
+                        Show ${hiddenRemovalBreaches.length} more
+                    </button>
+                `;
+            }
+
+            if (breachesListEl) {
+                breachesListEl.innerHTML = `
+                    <div class="breachesFound">
+                        <h4>Your Data Found In:</h4>
+                        <div class="breachTagList">
+                            ${breachTagsHTML}
+                        </div>
+                    </div>
+                `;
+
+                // Add toggle listener for breach expand/collapse
+                const removalToggleBtn = breachesListEl.querySelector('.removalToggleBtn');
+                if (removalToggleBtn) {
+                    removalToggleBtn.addEventListener('click', (e) => {
+                        const targetId = e.target.dataset.target;
+                        const hiddenCount = e.target.dataset.hiddenCount;
+                        const container = document.getElementById(targetId);
+
+                        if (container.classList.contains('expanded')) {
+                            container.classList.remove('expanded');
+                            e.target.textContent = `Show ${hiddenCount} more`;
+                        } else {
+                            container.classList.add('expanded');
+                            e.target.textContent = 'Show less';
+                        }
+                    });
+                }
+            }
+
+            // Render provider cards in the SEPARATE dashboard below
             const providersHTML = providers.map(p => {
                 const currentStatus = statusMap[p.id] || "Not started";
                 const steps = p.steps || [];
@@ -377,37 +460,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }).join('');
 
-            providersEl.innerHTML = breachListHTML + providersHTML;
+            if (providersEl) {
+                providersEl.innerHTML = providersHTML;
 
-            // Add event listeners to status dropdowns
-            providersEl.querySelectorAll('.statusDropdown').forEach(dropdown => {
-                dropdown.addEventListener('change', async (e) => {
-                    const providerId = e.target.dataset.providerId;
-                    const newStatus = e.target.value;
-                    const card = e.target.closest('.providerCard');
-                    const badge = card.querySelector('.statusBadge');
+                // Add event listeners to status dropdowns
+                providersEl.querySelectorAll('.statusDropdown').forEach(dropdown => {
+                    dropdown.addEventListener('change', async (e) => {
+                        const providerId = e.target.dataset.providerId;
+                        const newStatus = e.target.value;
+                        const card = e.target.closest('.providerCard');
+                        const badge = card.querySelector('.statusBadge');
 
-                    try {
-                        await postRemovalAction(providerId, newStatus);
-                        // Update the badge
-                        badge.className = `statusBadge status-${newStatus.toLowerCase().replace(' ', '-')}`;
-                        badge.textContent = newStatus;
-                        // Refresh summary
-                        const updatedSummary = await fetchRemovalSummary();
-                        renderSummary(summaryEl, updatedSummary);
-                    } catch (err) {
-                        console.error("Failed to update status:", err);
-                        alert("Failed to save status. Please try again.");
-                    }
+                        try {
+                            await postRemovalAction(providerId, newStatus);
+                            // Update the badge
+                            badge.className = `statusBadge status-${newStatus.toLowerCase().replace(' ', '-')}`;
+                            badge.textContent = newStatus;
+                            // Refresh summary
+                            const updatedSummary = await fetchRemovalSummary();
+                            renderSummary(summaryEl, updatedSummary);
+                        } catch (err) {
+                            console.error("Failed to update status:", err);
+                            alert("Failed to save status. Please try again.");
+                        }
+                    });
                 });
-            });
+            }
 
-            // Render formatted summary
+            // Render formatted summary in left column
             renderSummary(summaryEl, summary);
 
         } catch (err) {
             console.error("Failed to load removal protocol:", err);
-            providersEl.innerHTML = '<p class="removalError">Failed to load removal protocol. Please refresh the page.</p>';
+            if (breachesListEl) {
+                breachesListEl.innerHTML = '<p class="removalError">Failed to load. Please refresh.</p>';
+            }
+            if (providersEl) {
+                providersEl.innerHTML = '<p class="removalError">Failed to load removal protocol. Please refresh the page.</p>';
+            }
         }
     }
 
