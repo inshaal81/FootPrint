@@ -416,27 +416,6 @@ body {
   transform: translateY(-1px);
 }
 
-#scrollUpBtn {
-  display: flex;
-  justify-self: right;
-  margin-right: 25px;
-  position: sticky;
-  padding: 16px 24px;
-  border-radius: 999px;
-  border: 2px solid var(--orange);
-  background: var(--text);
-  color: var(--cta-text);
-  font-size: 24px;
-  font-weight: 1000;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-#scrollUpBtn:hover {
-  background: #374151;
-  transform: translateY(-1px);
-}
-
 /* ===== FIXED MODAL STYLES ===== */
 .modal {
   display: none;
@@ -582,8 +561,7 @@ body.dark .titleTwo {
 }
 body.dark #themeToggle,
 body.dark #logInBtn,
-body.dark #signUpBtn,
-body.dark #scrollUpBtn {
+body.dark #signUpBtn {
   background-color: #2b2b2b;
   color: #ffffff;
   border: 1px solid #ffd27f;
@@ -591,8 +569,7 @@ body.dark #scrollUpBtn {
 }
 body.dark #themeToggle:hover,
 body.dark #logInBtn:hover,
-body.dark #signUpBtn:hover,
-body.dark #scrollUpBtn:hover {
+body.dark #signUpBtn:hover {
   background-color: #ffd27f;
   color: #000;
 }

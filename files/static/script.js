@@ -11,15 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById("themeToggle");
     toggle?.addEventListener("click", () => document.body.classList.toggle("dark"));
 
-    // ===== Scroll up button =====
-    const scrollUpBtn = document.getElementById("scrollUpBtn");
-    if (scrollUpBtn) {
-        window.addEventListener("scroll", () => {
-            scrollUpBtn.style.display = window.scrollY > 300 ? "block" : "none";
-        });
-        scrollUpBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-    }
-
     // ===== Open login modal =====
     const loginBtn = document.getElementById("logInBtn");
     loginBtn?.addEventListener("click", e => {
