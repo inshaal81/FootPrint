@@ -36,6 +36,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .header {
@@ -49,8 +50,9 @@ body {
   backdrop-filter: saturate(1.6) blur(8px);
   border-bottom: 2px solid var(--line);
   z-index: 50;
-  height: 70px;            
-  overflow: visible;       
+  height: 70px;
+  overflow: visible;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .logo img {
@@ -150,6 +152,7 @@ body {
   border-radius: 16px;
   background: var(--bg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .leftColumn,
@@ -162,6 +165,7 @@ body {
   padding: 48px;
   border: 1px solid var(--line);
   min-height: 825px;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .inputCard,
