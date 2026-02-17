@@ -113,11 +113,11 @@ class RemovalProvider(db.Model):
 
 class RemovalAction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)        
-    provider_id = db.Column(db.String(50), nullable=False)   
-    status = db.Column(db.String(30), nullable=False)        
-    notes = db.Column(db.Text, nullable=True)                
-    created_at = db.Column(db.String(40), nullable=False)  
+    user_id = db.Column(db.Integer, nullable=False)
+    provider_id = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(30), nullable=False)
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  
 
 #Khang (review model for user feedback on providers)
 class Review(db.Model):
@@ -205,9 +205,6 @@ def home():
 @app.route("/about")
 def about():
     return render_template("aboutus.html")
-@app.route("/")
-def index():
-    return render_template("index.html")
 
 #Terry
 # ===== Rate Limiting Constants =====
@@ -377,6 +374,7 @@ def api_removal_providers():
 
 #POST
 @app.route("/api/removal/action", methods=["POST"])
+@csrf.exempt  # Exempt from CSRF - uses session auth + JSON body
 def api_removal_action():
     if 'user_id' not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -397,9 +395,7 @@ def api_removal_action():
         user_id=session["user_id"],
         provider_id=provider_id,
         status=status,
-        notes=notes,
-        created_at=datetime.utcnow().isoformat()
-
+        notes=notes
     )
 
     db.session.add(action)
@@ -429,7 +425,7 @@ def api_removal_summary():
                 "provider_id": a.provider_id,
                 "status": a.status,
                 "notes": a.notes,
-                "created_at": a.created_at
+                "created_at": a.created_at.isoformat() if a.created_at else None
             } for a in actions
         ]
     })

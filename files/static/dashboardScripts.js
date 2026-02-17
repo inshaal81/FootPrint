@@ -115,13 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 if (hasEmailBreaches) {
-                    renderRemovalProtocol([
-                        {
-                            Name: "ExampleBreach",
-                            BreachDate: "2021-01-01",
-                            DataClasses: ["Emails", "Passwords"]
-                        }
-                    ]);
+                    // Collect all breach names from all breached emails
+                    const allBreaches = emailResults
+                        .filter(r => r.breached && r.breaches.length > 0)
+                        .flatMap(r => r.breaches);
+                    // Remove duplicates
+                    const uniqueBreaches = [...new Set(allBreaches)];
+                    renderRemovalProtocol(uniqueBreaches);
                 }
 
             } catch (error) {
@@ -309,22 +309,130 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!section || breaches.length === 0) return;
 
         section.style.display = "block";
-        providersEl.innerHTML = "<p>Loading removal options...</p>";
+        providersEl.innerHTML = '<p class="removalLoading">Loading removal options...</p>';
 
         try {
-            const providers = await fetchRemovalProviders();
-            providersEl.innerHTML = providers.map(p => `
-                <div>
-                    <strong>${p.name}</strong>
-                    <a href="${p.optOutUrl}" target="_blank">Opt out</a>
-                </div>
-            `).join("");
+            // Fetch providers and summary in parallel
+            const [providers, summary] = await Promise.all([
+                fetchRemovalProviders(),
+                fetchRemovalSummary()
+            ]);
 
-            const summary = await fetchRemovalSummary();
-            summaryEl.textContent = JSON.stringify(summary, null, 2);
-        } catch {
-            providersEl.textContent = "Failed to load removal protocol.";
+            // Build a map of latest status per provider from summary
+            const statusMap = {};
+            if (summary.actions) {
+                summary.actions.forEach(action => {
+                    // Only keep the latest status per provider (actions are ordered desc)
+                    if (!statusMap[action.provider_id]) {
+                        statusMap[action.provider_id] = action.status;
+                    }
+                });
+            }
+
+            // Display breach names the user was found in
+            let breachListHTML = `
+                <div class="breachesFound">
+                    <h4>Your Data Found In:</h4>
+                    <div class="breachTagList">
+                        ${breaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Render provider cards with status dropdowns
+            const providersHTML = providers.map(p => {
+                const currentStatus = statusMap[p.id] || "Not started";
+                const steps = p.steps || [];
+
+                return `
+                    <div class="providerCard" data-provider-id="${p.id}">
+                        <div class="providerHeader">
+                            <div class="providerInfo">
+                                <h4 class="providerName">${p.name}</h4>
+                                ${p.eta ? `<span class="providerEta">ETA: ${p.eta}</span>` : ''}
+                            </div>
+                            <div class="providerActions">
+                                <select class="statusDropdown" data-provider-id="${p.id}">
+                                    <option value="Not started" ${currentStatus === "Not started" ? "selected" : ""}>Not started</option>
+                                    <option value="Submitted" ${currentStatus === "Submitted" ? "selected" : ""}>Submitted</option>
+                                    <option value="Completed" ${currentStatus === "Completed" ? "selected" : ""}>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="providerBody">
+                            <a href="${p.optOutUrl}" target="_blank" rel="noopener noreferrer" class="optOutLink">
+                                Open Opt-Out Page
+                            </a>
+                            ${steps.length > 0 ? `
+                                <div class="providerSteps">
+                                    <strong>Steps:</strong>
+                                    <ol>
+                                        ${steps.map(step => `<li>${step}</li>`).join('')}
+                                    </ol>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="statusBadge status-${currentStatus.toLowerCase().replace(' ', '-')}">${currentStatus}</div>
+                    </div>
+                `;
+            }).join('');
+
+            providersEl.innerHTML = breachListHTML + providersHTML;
+
+            // Add event listeners to status dropdowns
+            providersEl.querySelectorAll('.statusDropdown').forEach(dropdown => {
+                dropdown.addEventListener('change', async (e) => {
+                    const providerId = e.target.dataset.providerId;
+                    const newStatus = e.target.value;
+                    const card = e.target.closest('.providerCard');
+                    const badge = card.querySelector('.statusBadge');
+
+                    try {
+                        await postRemovalAction(providerId, newStatus);
+                        // Update the badge
+                        badge.className = `statusBadge status-${newStatus.toLowerCase().replace(' ', '-')}`;
+                        badge.textContent = newStatus;
+                        // Refresh summary
+                        const updatedSummary = await fetchRemovalSummary();
+                        renderSummary(summaryEl, updatedSummary);
+                    } catch (err) {
+                        console.error("Failed to update status:", err);
+                        alert("Failed to save status. Please try again.");
+                    }
+                });
+            });
+
+            // Render formatted summary
+            renderSummary(summaryEl, summary);
+
+        } catch (err) {
+            console.error("Failed to load removal protocol:", err);
+            providersEl.innerHTML = '<p class="removalError">Failed to load removal protocol. Please refresh the page.</p>';
         }
+    }
+
+    function renderSummary(summaryEl, summary) {
+        const submitted = summary.submitted || 0;
+        const completed = summary.completed || 0;
+        const total = summary.actions ? summary.actions.length : 0;
+        const notStarted = total - submitted - completed;
+
+        summaryEl.innerHTML = `
+            <div class="summaryStats">
+                <div class="summaryItem">
+                    <span class="summaryCount summaryNotStarted">${notStarted >= 0 ? notStarted : 0}</span>
+                    <span class="summaryLabel">Not Started</span>
+                </div>
+                <div class="summaryItem">
+                    <span class="summaryCount summarySubmitted">${submitted}</span>
+                    <span class="summaryLabel">Submitted</span>
+                </div>
+                <div class="summaryItem">
+                    <span class="summaryCount summaryCompleted">${completed}</span>
+                    <span class="summaryLabel">Completed</span>
+                </div>
+            </div>
+        `;
     }
 
 });

@@ -924,6 +924,378 @@ body.dark .breachAdvice {
   color: #f87171;
 }
 
+/* ===== Data Removal Protocol Section ===== */
+#removalProtocol {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+#removalProtocol h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+#removalProtocol .subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.removalLoading {
+  color: var(--muted);
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+}
+
+.removalError {
+  color: #dc2626;
+  padding: 16px;
+  background: #fee;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Breaches Found Section */
+.breachesFound {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.breachesFound h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 10px;
+}
+
+.breachTagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.breachTagSmall {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+/* Provider Cards */
+.providerCard {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.providerCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.providerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.providerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.providerName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.providerEta {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.providerActions {
+  flex-shrink: 0;
+}
+
+.statusDropdown {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.statusDropdown:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.providerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optOutLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+  width: fit-content;
+}
+
+.optOutLink:hover {
+  background: #e06d0f;
+}
+
+.providerSteps {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.providerSteps strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.providerSteps ol {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+.providerSteps li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* Status Badge */
+.statusBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 12px;
+}
+
+.statusBadge.status-not-started {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.statusBadge.status-submitted {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.statusBadge.status-completed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Summary Section */
+#removalProtocol h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+#removalSummary {
+  font-family: inherit;
+  white-space: normal;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.summaryStats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 80px;
+}
+
+.summaryCount {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.summaryLabel {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.summaryNotStarted {
+  color: #6b7280;
+}
+
+.summarySubmitted {
+  color: #2563eb;
+}
+
+.summaryCompleted {
+  color: #16a34a;
+}
+
+/* Dark Mode - Removal Protocol */
+body.dark #removalProtocol {
+  border-top-color: #444;
+}
+
+body.dark #removalProtocol h3,
+body.dark #removalProtocol h4 {
+  color: #ffffff;
+}
+
+body.dark #removalProtocol .subtitle {
+  color: #aaaaaa;
+}
+
+body.dark .removalError {
+  background: #2a1a1a;
+  color: #fca5a5;
+}
+
+body.dark .breachesFound {
+  background: linear-gradient(135deg, #3d2a0a, #4a3410);
+  border-color: #b45309;
+}
+
+body.dark .breachesFound h4 {
+  color: #fcd34d;
+}
+
+body.dark .breachTagSmall {
+  background: #b45309;
+}
+
+body.dark .providerCard {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .providerCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .providerName {
+  color: #ffffff;
+}
+
+body.dark .providerEta {
+  color: #aaaaaa;
+}
+
+body.dark .statusDropdown {
+  background: #2b2b2b;
+  color: #ffffff;
+  border-color: #555;
+}
+
+body.dark .statusDropdown:focus {
+  border-color: #ffd27f;
+}
+
+body.dark .optOutLink {
+  background: #ffd27f;
+  color: #000;
+}
+
+body.dark .optOutLink:hover {
+  background: #ffbc47;
+}
+
+body.dark .providerSteps {
+  color: #aaaaaa;
+}
+
+body.dark .providerSteps strong {
+  color: #e0e0e0;
+}
+
+body.dark .statusBadge.status-not-started {
+  background: #374151;
+  color: #9ca3af;
+}
+
+body.dark .statusBadge.status-submitted {
+  background: #1e3a5f;
+  color: #60a5fa;
+}
+
+body.dark .statusBadge.status-completed {
+  background: #1a3a1a;
+  color: #4ade80;
+}
+
+body.dark .summaryItem {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .summaryLabel {
+  color: #aaaaaa;
+}
+
+body.dark .summaryNotStarted {
+  color: #9ca3af;
+}
+
+body.dark .summarySubmitted {
+  color: #60a5fa;
+}
+
+body.dark .summaryCompleted {
+  color: #4ade80;
+}
+
 @media (max-width: 768px) {
   .dashboardBody {
     grid-template-columns: 1fr;
@@ -946,5 +1318,20 @@ body.dark .breachAdvice {
   .inputCard,
   .resultsCard {
     padding: 24px;
+  }
+
+  .summaryStats {
+    justify-content: center;
+  }
+
+  .providerHeader {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .statusBadge {
+    position: static;
+    align-self: flex-start;
+    margin-top: 10px;
   }
 }
