@@ -618,11 +618,14 @@ body.dark .featureText{
   color:rgb(206, 206, 206);
 }
 body.dark .featureBoxes > div,
+body.dark .stats > div {
+  background-color: #121212;
+  border: 1px solid #ffd27f;
+}
 
-body.dark .stats > div,
 body.dark .howItWorks {
   background-color: #121212;
-  border: 2px solid #ffd27f; 
+  border: 2px solid #ffd27f;
 }
 
 body.dark .howItWorks .arrow {
