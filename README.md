@@ -609,25 +609,25 @@ FootPrint/
   <tr>
     <td align="center">
       <strong>Muhammad Inshaal</strong><br>
-      <sub>Computer Science, Drexel University</sub><br>
-      <sub>Web Development, Machine Learning</sub>
+      <sub>Web Development, Machine Learning</sub><br>
+      <sub>Project Lead & Developer</sub>
     </td>
     <td align="center">
       <strong>Terry Tran</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Project Leadership</sub>
+      <sub>Database Developer</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
       <strong>Trung Nguyen</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Web Development, Networking</sub>
+      <sub>JavaScript Dev</sub>
     </td>
     <td align="center">
       <strong>Vi Khang Tran</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Database Management, Networking</sub>
+      <sub>Networking</sub>
     </td>
   </tr>
 </table>
