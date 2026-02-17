@@ -174,48 +174,108 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== Display Results (Ishaal) =====
     function displayResults(emailResults, passwordResult) {
-        if (resultsPlaceholder) resultsPlaceholder.style.display = "none";
+        if (resultsPlaceholder) {
+            resultsPlaceholder.style.display = "none";
+        }
         resultsCard.style.display = "block";
         breachResults.innerHTML = "";
 
         let resultsHTML = "";
 
+        // Password Results Section
         if (passwordResult) {
-            resultsHTML += passwordResult.breached
-                ? `<div class="passwordBreachResult breached">
-                    <h4>Password Compromised</h4>
-                    <p>${passwordResult.message}</p>
-                </div>`
-                : `<div class="passwordBreachResult safe">
-                    <h4>Password Safe</h4>
-                    <p>${passwordResult.message}</p>
-                </div>`;
+            if (passwordResult.breached) {
+                resultsHTML += `
+                    <div class="passwordBreachResult breached ${passwordResult.severity}">
+                        <div class="passwordBreachHeader">
+                            <span class="passwordBreachIcon">⚠️</span>
+                            <h4>Password Compromised</h4>
+                        </div>
+                        <p class="passwordBreachMessage">${passwordResult.message}</p>
+                        <p class="passwordBreachAdvice">We strongly recommend changing this password immediately.</p>
+                        <div class="passwordBreachSeverity">
+                            <span class="severityLabel">Severity:</span>
+                            <span class="severityBadge ${passwordResult.severity}">${passwordResult.severity.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsHTML += `
+                    <div class="passwordBreachResult safe">
+                        <div class="passwordBreachHeader">
+                            <span class="passwordBreachIcon">✅</span>
+                            <h4>Password Not Found in Breaches</h4>
+                        </div>
+                        <p class="passwordBreachMessage">${passwordResult.message}</p>
+                        <p class="passwordBreachNote">Note: This doesn't guarantee the password is strong—only that it hasn't appeared in known breaches.</p>
+                    </div>
+                `;
+            }
         }
 
-        emailResults.forEach(result => {
-            if (result.error) {
-                resultsHTML += `<div class="emailBreachNotice">${result.error}</div>`;
-            } else if (!result.breached) {
-                resultsHTML += `<div class="noBreachFound">
-                    No breaches for <strong>${result.email}</strong>
-                </div>`;
-            } else {
-                resultsHTML += `<div class="emailBreachSection">
-                    <h4>Breaches for ${result.email}</h4>
-                    ${result.breaches.map(b => `<span class="breachTag">${b}</span>`).join("")}
-                </div>`;
-            }
-        });
+        // Email Results Section (handles multiple emails)
+        if (emailResults && emailResults.length > 0) {
+            emailResults.forEach(result => {
+                // Show error message for email if API error
+                if (result.error) {
+                    resultsHTML += `
+                        <div class="emailBreachNotice">
+                            <div class="noticeHeader">
+                                <span class="noticeIcon">⚠️</span>
+                                <h4>Email Check Error for ${result.email}</h4>
+                            </div>
+                            <p class="noticeMessage">${result.error}</p>
+                        </div>
+                    `;
+                } else if (!result.breached || result.breaches.length === 0) {
+                    resultsHTML += `
+                        <div class="noBreachFound">
+                            <h4>Good News!</h4>
+                            <p>No breaches found for <strong>${result.email}</strong></p>
+                            <p style="margin-top: 8px; font-size: 13px;">Your email has not appeared in any known data breaches.</p>
+                        </div>
+                    `;
+                } else {
+                    // XposedOrNot returns breach names as simple strings
+                    resultsHTML += `<div class="emailBreachSection">
+                        <div class="emailBreachHeader breached">
+                            <span class="breachIcon">⚠️</span>
+                            <h4>Breaches Found for ${result.email}</h4>
+                        </div>
+                        <p class="breachSummary">This email was found in <strong>${result.breaches.length}</strong> data breach${result.breaches.length !== 1 ? 'es' : ''}:</p>
+                        <div class="breachList">
+                    `;
+
+                    const breachesHTML = result.breaches.map(breachName => {
+                        return `<span class="breachTag">${breachName}</span>`;
+                    }).join('');
+
+                    resultsHTML += breachesHTML + `
+                        </div>
+                        <p class="breachAdvice">We recommend reviewing your security settings and changing passwords for these services.</p>
+                    </div>`;
+                }
+            });
+        }
 
         breachResults.innerHTML = resultsHTML;
-        resultsCard.scrollIntoView({ behavior: 'smooth' });
+
+        // Scroll to results
+        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
+    // ===== Show Error =====
     function showError(message) {
-        if (resultsPlaceholder) resultsPlaceholder.style.display = "none";
+        if (resultsPlaceholder) {
+            resultsPlaceholder.style.display = "none";
+        }
         loadingIndicator.style.display = "none";
         resultsCard.style.display = "block";
-        breachResults.innerHTML = `<div class="errorMessage">${message}</div>`;
+        breachResults.innerHTML = `
+            <div class="errorMessage">
+                <strong>Error:</strong> ${message}
+            </div>
+        `;
     }
 
     
