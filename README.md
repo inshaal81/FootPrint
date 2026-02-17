@@ -12,10 +12,6 @@
   A data breach detection web application that helps users discover if their personal information has been compromised in known data breaches.
 </p>
 
-<p align="center">
-  <a href="https://github.com/inshaal81/FootPrint.git">View Repository</a>
-</p>
-
 ---
 
 ## Table of Contents
@@ -313,10 +309,6 @@ python app.py
 git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint/files && python -m venv venv && source venv/bin/activate && pip install flask flask-sqlalchemy flask-wtf requests && python app.py
 ```
 
-The application will be available at: **http://localhost:5001**
-
-> **Note:** The app runs on port 5001 (not 5000) to avoid conflicts with macOS AirPlay Receiver.
-
 ---
 
 ## Usage
@@ -603,10 +595,6 @@ FootPrint/
 |   |   |-- data.db               # SQLite database (auto-generated)
 |   |-- venv/                     # Python virtual environment
 |-- README.md                     # This file
-|-- MuhammadInshaalBio.txt        # Contributor bio
-|-- TerryTranBio.txt              # Contributor bio
-|-- TrungNguyenBio.txt            # Contributor bio
-|-- ViKhangTranBio.txt            # Contributor bio
 ```
 
 ---
@@ -617,25 +605,25 @@ FootPrint/
   <tr>
     <td align="center">
       <strong>Muhammad Inshaal</strong><br>
-      <sub>Computer Science, Drexel University</sub><br>
-      <sub>Web Development, Machine Learning</sub>
+      <sub>Web Development, Machine Learning</sub><br>
+      <sub>Project Lead & Developer</sub>
     </td>
     <td align="center">
       <strong>Terry Tran</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Project Leadership</sub>
+      <sub>Database Developer</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
       <strong>Trung Nguyen</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Web Development, Networking</sub>
+      <sub>JavaScript Dev</sub>
     </td>
     <td align="center">
       <strong>Vi Khang Tran</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Database Management, Networking</sub>
+      <sub>Networking</sub>
     </td>
   </tr>
 </table>
