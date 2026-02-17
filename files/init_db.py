@@ -9,9 +9,10 @@ with app.app_context():
                 user_id INTEGER,
                 action TEXT,
                 target TEXT,
+                status TEXT,
                 ip_address TEXT,
                 user_agent TEXT,
-                created_at TEXT
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """))
         conn.commit()

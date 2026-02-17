@@ -131,7 +131,39 @@ class Review(db.Model):
 
 # Create tables
 with app.app_context():
-    db.create_all() 
+    db.create_all()
+    # Create activity_logs table (used by tracker module)
+    from sqlalchemy import text
+    with db.engine.connect() as conn:
+        if DATABASE_URL:
+            # PostgreSQL syntax
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS activity_logs (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER,
+                    action TEXT,
+                    target TEXT,
+                    status TEXT,
+                    ip_address TEXT,
+                    user_agent TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+        else:
+            # SQLite syntax
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS activity_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    action TEXT,
+                    target TEXT,
+                    status TEXT,
+                    ip_address TEXT,
+                    user_agent TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+        conn.commit()
     if RemovalProvider.query.count() == 0:
         providers = [
             RemovalProvider(
