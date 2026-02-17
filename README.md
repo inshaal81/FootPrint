@@ -313,10 +313,6 @@ python app.py
 git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint/files && python -m venv venv && source venv/bin/activate && pip install flask flask-sqlalchemy flask-wtf requests && python app.py
 ```
 
-The application will be available at: **http://localhost:5001**
-
-> **Note:** The app runs on port 5001 (not 5000) to avoid conflicts with macOS AirPlay Receiver.
-
 ---
 
 ## Usage
@@ -603,10 +599,6 @@ FootPrint/
 |   |   |-- data.db               # SQLite database (auto-generated)
 |   |-- venv/                     # Python virtual environment
 |-- README.md                     # This file
-|-- MuhammadInshaalBio.txt        # Contributor bio
-|-- TerryTranBio.txt              # Contributor bio
-|-- TrungNguyenBio.txt            # Contributor bio
-|-- ViKhangTranBio.txt            # Contributor bio
 ```
 
 ---
