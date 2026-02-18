@@ -198,7 +198,7 @@ body {
   padding: 6px 10px;
   margin-bottom: 10px;
   border-radius: 999px;
-  border: 0.5px solid var(--orange);
+  border: 1px solid var(--orange);
   background: rgba(255, 136, 0, 0.1);
   color: var(--orange);
 }
@@ -392,7 +392,7 @@ body {
   padding: 6px 10px;
   margin-bottom: 10px;
   border-radius: 999px;
-  border: 0.5px solid var(--orange);
+  border: 1px solid var(--orange);
   background: rgba(255, 136, 0, 0.1);
   color: var(--orange);
 }
