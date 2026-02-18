@@ -778,7 +778,7 @@ Wait 5 minutes for the lockout to expire, or manually clear the LoginAttempt tab
 
 ## License
 
-This is an academic project developed for coursework at **Drexel University**.
+This project uses the **MIT License**.
 
 ---
 
