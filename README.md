@@ -9,7 +9,19 @@
 </p>
 
 <p align="center">
-  A data breach detection web application that helps users discover if their personal information has been compromised in known data breaches.
+  A comprehensive data breach detection and removal web application that helps users discover if their personal information has been compromised and provides actionable steps to secure their digital footprint.
+</p>
+
+<p align="center">
+  <a href="https://footprint-ia69.onrender.com">View Live Demo</a>
+</p>
+
+---
+
+## Demo
+
+<p align="center">
+  <img src="FootPrintDashboardDemo.gif" alt="FootPrint Dashboard Demo" width="800">
 </p>
 
 ---
@@ -19,10 +31,11 @@
 - [Why FootPrint?](#why-footprint)
 - [Features](#features)
 - [How It Works](#how-it-works)
-- [Application Flow](#application-flow)
+- [Data Removal Protocol](#data-removal-protocol)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
+- [Deployment](#deployment)
 - [Usage](#usage)
 - [API Documentation](#api-documentation)
 - [Security Measures](#security-measures)
@@ -39,8 +52,9 @@ In today's digital age, data breaches occur with alarming frequency. Major compa
 
 **FootPrint empowers you to:**
 
-- **Priority** - Identify if your email or password has been exposed before attackers can exploit it
-- **Protect** - Regain control of your digital security by knowing which accounts need attention
+- **Detect** - Identify if your email or password has been exposed before attackers can exploit it
+- **Protect** - Receive breach-specific remediation steps tailored to each compromised service
+- **Remove** - Follow guided opt-out procedures for 15+ data brokers selling your personal information
 - **Prevent** - Stop credential stuffing attacks by identifying and changing compromised passwords
 
 FootPrint provides a simple, secure interface to check your credentials against databases of known breaches without ever storing or transmitting your actual password.
@@ -55,19 +69,37 @@ Check if your email address appears in any known data breaches. FootPrint querie
 ### Password Breach Checking
 Verify if your password has been exposed in data breaches. Using the k-anonymity model, your password is never sent over the network - only a partial hash is transmitted, ensuring your password remains private even during the check.
 
+### Data Removal Protocol
+
+FootPrint provides a comprehensive two-tier data removal system:
+
+**Tier 1: Breach-Specific Remediation Actions**
+- 25+ major breaches mapped to specific security steps
+- Priority-ranked actions (High, Medium, Low)
+- Direct links to security settings pages
+- Step-by-step instructions for each breached service (LinkedIn, Adobe, Facebook, Twitter, Spotify, and more)
+
+**Tier 2: Data Broker Opt-Out Guide**
+- 15 data broker removal providers with opt-out URLs
+- Estimated removal timeframes (ETA)
+- Step-by-step opt-out instructions
+- Covers major brokers: Whitepages, Spokeo, BeenVerified, Intelius, Radaris, and more
+- Includes parent company opt-outs for broader coverage (PeopleConnect, Acxiom, LexisNexis)
+
 ### Secure User Authentication
 - Create an account with validated credentials
-- Login with rate limiting protection against brute-force attacks
+- Login with rate limiting protection against brute-force attacks (3 attempts, 5-minute lockout)
 - Session-based authentication with secure cookies
+- CSRF protection on all forms
 
 ### Modern UI/UX
 - Clean, responsive dashboard design
 - Real-time breach checking with visual feedback
-- Light and dark theme toggle for comfortable viewing
+- Smooth animated light/dark theme toggle
 - Mobile-responsive layout
 
 ### Privacy-First Design
-- No passwords are stored in plain text
+- No passwords are stored in plain text (PBKDF2-SHA256 hashing)
 - Password checking uses k-anonymity (only 5 characters of SHA-1 hash sent to API)
 - All sensitive operations happen server-side
 
@@ -102,9 +134,16 @@ User enters email
         |
         v
 +-------------------+
+| Backend fetches   |
+| breach-specific   |
+| remediation steps |
++-------------------+
+        |
+        v
++-------------------+
 | Results displayed |
-| with breach names |
-| and advice        |
+| with actions and  |
+| security advice   |
 +-------------------+
 ```
 
@@ -163,30 +202,47 @@ User enters password
 
 ---
 
-## Application Flow
+## Data Removal Protocol
 
-### 1. Landing Page
-Users arrive at the landing page which showcases:
-- Key features: Leak Path Mapping, Real-Time Alerts, Policy Guardrails, Incident Analysis
-- Statistics about the platform
-- Clear call-to-action for signup and login
+### Breach-Specific Actions
 
-### 2. Authentication
-- **Signup**: Create account with username, email, and password (with validation)
-- **Login**: Authenticate with rate limiting protection (3 attempts, 5-minute lockout)
+When breaches are detected, FootPrint provides tailored remediation steps for 25+ services:
 
-### 3. Dashboard
-After authentication, users access the dashboard where they can:
-- Enter email addresses to check for breaches
-- Enter passwords to verify if they have been exposed
-- View detailed results with breach names and recommendations
-- Toggle between light and dark themes
+| Service | Priority | Actions Include |
+|---------|----------|-----------------|
+| LinkedIn | High | Password change, 2FA, session review, connected apps audit |
+| Adobe | High | Password change, two-step verification, privacy review |
+| Facebook | High | Password change, 2FA, active sessions check, app review |
+| Dropbox | High | Password change, 2FA, linked apps audit |
+| Patreon | High | Password change, 2FA, payment methods review |
+| Twitter/X | Medium | Password change, 2FA, login history check |
+| Spotify | Medium | Password change, sign out everywhere |
+| Canva | Medium | Password change, 2FA, account deletion option |
+| MyFitnessPal | Medium | Password change, connected apps review |
+| Kickstarter | Medium | Password change, 2FA, payment methods review |
+| And 15+ more... | Varies | Service-specific security steps |
 
-### 4. Results Display
-- **Email breaches**: Shows list of compromised services (e.g., LinkedIn, Adobe)
-- **Password breaches**: Shows exposure count and severity rating
-- **No breaches**: Green confirmation message
-- Actionable security advice for compromised credentials
+### Data Broker Opt-Out Providers
+
+FootPrint guides you through removing your data from 15 major data brokers:
+
+| Provider | Category | Estimated Time |
+|----------|----------|----------------|
+| Whitepages | People Search | 1-7 days |
+| Spokeo | People Search | 3-10 days |
+| BeenVerified | People Search | 24-48 hours |
+| Intelius | People Search | 72 hours |
+| Radaris | People Search | 24-48 hours |
+| PeopleFinders | People Search | 5-7 days |
+| FastPeopleSearch | People Search | 72 hours |
+| Nuwber | People Search | 3-5 days |
+| PeopleConnect | Parent Company | 48-72 hours |
+| Acxiom | Data Aggregator | 7-30 days |
+| LexisNexis | Data Aggregator | 7-14 days |
+| MyLife | People Search | 7-14 days |
+| That's Them | People Search | 24-48 hours |
+| FamilyTreeNow | People Search | 24-48 hours |
+| USPhoneBook | People Search | 24-48 hours |
 
 ---
 
@@ -217,33 +273,33 @@ After authentication, users access the dashboard where they can:
 |  | - /logout  |  | - /logout  |  |   breach     | |
 |  +------------+  +------------+  | - /api/      | |
 |                                  |   check-     | |
-|                                  |   password   | |
-|                                  +--------------+ |
-|                         |                         |
-|  +------------------+   |   +------------------+  |
-|  | Security Layer   |   |   | Session Mgmt    |  |
-|  | - CSRF Protection|   |   | - Flask Session |  |
-|  | - Rate Limiting  |   |   | - User Context  |  |
-|  | - Input Valid.   |   |   +------------------+  |
-|  +------------------+                             |
+|  +------------+                  |   password   | |
+|  | Removal    |                  | - /api/      | |
+|  | Protocol   |                  |   removal/*  | |
+|  | - Breach   |                  +--------------+ |
+|  |   Actions  |                                  |
+|  | - Data     |   +------------------+           |
+|  |   Brokers  |   | Security Layer   |           |
+|  +------------+   | - CSRF Protection|           |
+|                   | - Rate Limiting  |           |
+|                   | - Input Valid.   |           |
+|                   +------------------+           |
 +--------------------------------------------------+
            |                           |
            v                           v
 +------------------+         +-------------------+
-|    SQLite DB     |         |   External APIs   |
+|    Database      |         |   External APIs   |
 | +-------------+  |         | +---------------+ |
-| | Users       |  |         | | XposedOrNot   | |
-| | - id        |  |         | | (Email)       | |
-| | - username  |  |         | +---------------+ |
-| | - email     |  |         | +---------------+ |
-| | - password  |  |         | | HIBP Pwned    | |
+| | PostgreSQL  |  |         | | XposedOrNot   | |
+| | (production)|  |         | | (Email)       | |
+| | SQLite      |  |         | +---------------+ |
+| | (local dev) |  |         | +---------------+ |
+| +-------------+  |         | | HIBP Pwned    | |
 | +-------------+  |         | | Passwords     | |
-| +-------------+  |         | +---------------+ |
+| | Users       |  |         | +---------------+ |
 | | LoginAttempt|  |         +-------------------+
-| | - id        |  |
-| | - username  |  |
-| | - count     |  |
-| | - locked    |  |
+| | Removal*    |  |
+| | Reviews     |  |
 | +-------------+  |
 +------------------+
 ```
@@ -255,14 +311,17 @@ After authentication, users access the dashboard where they can:
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Backend** | Flask 3.x (Python 3.10+) | Web framework, routing, API handling |
-| **Database** | SQLite | User storage, login attempt tracking |
+| **Database** | PostgreSQL (production) | User storage, removal tracking |
+| **Database** | SQLite (development) | Local development database |
 | **ORM** | Flask-SQLAlchemy | Database abstraction layer |
 | **Security** | Flask-WTF | CSRF protection |
 | **Security** | Werkzeug | Password hashing (PBKDF2-SHA256) |
-| **Frontend** | HTML5, CSS3 | Structure and styling |
+| **Server** | Gunicorn | Production WSGI server |
+| **Frontend** | HTML5, CSS3, CSS Variables | Structure and theming |
 | **Frontend** | JavaScript (ES6+) | Client-side interactivity |
 | **Frontend** | jQuery 4.0 | DOM manipulation |
 | **Fonts** | Google Fonts (Inter) | Typography |
+| **Deployment** | Render | Cloud hosting with PostgreSQL |
 
 ---
 
@@ -274,40 +333,73 @@ After authentication, users access the dashboard where they can:
 - pip (Python package manager)
 - Git
 
-### Step-by-Step Setup
+### Local Development Setup
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/inshaal81/FootPrint.git
 cd FootPrint
 
-# 2. Navigate to the application directory
-cd files
-
-# 3. Create a virtual environment
+# 2. Create a virtual environment
 python -m venv venv
 
-# 4. Activate the virtual environment
+# 3. Activate the virtual environment
 # On macOS/Linux:
 source venv/bin/activate
 # On Windows:
 venv\Scripts\activate
 
-# 5. Install dependencies
-pip install flask flask-sqlalchemy flask-wtf requests
+# 4. Install dependencies
+pip install -r files/requirements.txt
 
-# 6. (Optional) Set a production secret key
-export FLASK_SECRET_KEY="your-secure-random-key-here"
-
-# 7. Run the application
+# 5. Run the application
+cd files
 python app.py
 ```
+
+The application will be available at http://localhost:5001
 
 ### Quick Start (One-liner)
 
 ```bash
-git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint/files && python -m venv venv && source venv/bin/activate && pip install flask flask-sqlalchemy flask-wtf requests && python app.py
+git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint && python -m venv venv && source venv/bin/activate && pip install -r files/requirements.txt && cd files && python app.py
 ```
+
+---
+
+## Deployment
+
+### Deploy to Render
+
+FootPrint includes a `render.yaml` blueprint for one-click deployment to Render.
+
+#### Option 1: Blueprint Deployment (Recommended)
+
+1. Fork or push this repository to your GitHub account
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click **New** > **Blueprint**
+4. Connect your GitHub repository
+5. Render will automatically detect `render.yaml` and configure:
+   - A PostgreSQL database (`footprint-db`)
+   - A Python web service with Gunicorn
+   - Auto-generated `FLASK_SECRET_KEY`
+   - Database connection string
+
+#### Option 2: Manual Deployment
+
+1. Create a new **PostgreSQL** database on Render
+2. Create a new **Web Service** with these settings:
+   - **Runtime**: Python
+   - **Build Command**: `pip install -r files/requirements.txt`
+   - **Start Command**: `cd files && gunicorn app:app`
+3. Add environment variables:
+   - `FLASK_SECRET_KEY`: Generate a secure random string
+   - `DATABASE_URL`: Copy from your PostgreSQL database
+   - `PYTHON_VERSION`: `3.11.4`
+
+### Production URL
+
+The live application is deployed at: **https://footprint-ia69.onrender.com**
 
 ---
 
@@ -315,7 +407,7 @@ git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint/files && py
 
 ### Creating an Account
 
-1. Navigate to http://localhost:5001
+1. Navigate to https://footprint-ia69.onrender.com (or http://localhost:5001 for local)
 2. Click "Sign Up" button
 3. Enter:
    - Username (3-30 characters, alphanumeric with underscores/hyphens)
@@ -329,24 +421,21 @@ git clone https://github.com/inshaal81/FootPrint.git && cd FootPrint/files && py
 1. Log in to your account
 2. On the dashboard, you can check:
    - **Email Address**: Enter your email in the "Email Address" field
-   - **Additional Email**: Check multiple emails at once
    - **Password**: Enter any password to check (it will NOT be stored)
 3. Click "Check for Breaches"
 4. Review results:
    - Green = No breaches found
    - Red = Breaches detected with list of compromised services
 
-### Understanding Results
+### Using Data Removal Protocol
 
-**Email Results:**
-- Lists specific breaches where your email was found
-- Each breach shown as a tag (e.g., "LinkedIn", "Adobe")
-- Recommendations for securing affected accounts
+1. After checking for breaches, view the **Removal Protocol** section
+2. **Breach-Specific Actions**: For each detected breach, follow the provided steps to secure that specific account
+3. **Data Broker Opt-Out**: Visit each data broker's opt-out page and follow the step-by-step instructions to remove your information
 
-**Password Results:**
-- Shows how many times the password appeared in breaches
-- Severity badge (Critical/High/Medium/Low)
-- Recommendation to change if compromised
+### Theme Toggle
+
+Click the theme toggle button in the header to switch between light and dark modes. The preference is saved for future visits.
 
 ---
 
@@ -386,16 +475,6 @@ Check if an email address has been exposed in data breaches.
 }
 ```
 
-**Error Responses:**
-| Status | Description |
-|--------|-------------|
-| 400 | Invalid email format |
-| 401 | Unauthorized (not logged in) |
-| 429 | Rate limit exceeded |
-| 502 | External API error |
-| 503 | Service unavailable |
-| 504 | Request timeout |
-
 ### POST /api/check-password
 
 Check if a password has been exposed in data breaches using k-anonymity.
@@ -426,17 +505,70 @@ Check if a password has been exposed in data breaches using k-anonymity.
 }
 ```
 
-### Web Routes
+### POST /api/removal/breach-actions
 
-| Route | Method | Auth Required | Description |
-|-------|--------|---------------|-------------|
-| `/` | GET | No | Landing page |
-| `/login` | POST | No | Process login |
-| `/signup` | POST | No | Process registration |
-| `/dashboard` | GET | Yes | User dashboard |
-| `/logout` | GET | Yes | End session |
-| `/login_modal` | GET | No | Login form HTML |
-| `/signup_modal` | GET | No | Signup form HTML |
+Get breach-specific remediation actions for detected breaches.
+
+**Request:**
+```json
+{
+  "breaches": ["LinkedIn", "Adobe", "Facebook"]
+}
+```
+
+**Response:**
+```json
+{
+  "actions": [
+    {
+      "breach_name": "LinkedIn",
+      "action_type": "account_security",
+      "priority": "high",
+      "company": "LinkedIn",
+      "url": "https://www.linkedin.com/psettings/security",
+      "steps": [
+        "Change your LinkedIn password immediately",
+        "Enable two-factor authentication in Security Settings",
+        "Review all connected third-party apps"
+      ]
+    }
+  ],
+  "total_breaches": 3,
+  "matched_count": 3
+}
+```
+
+### GET /api/removal/providers
+
+Get list of data broker opt-out providers.
+
+**Response:**
+```json
+[
+  {
+    "id": "whitepages",
+    "name": "Whitepages",
+    "optOutUrl": "https://www.whitepages.com/suppression-requests",
+    "eta": "1-7 days",
+    "steps": [
+      "Search for your listing on the suppression page",
+      "Select your record from the results",
+      "Verify via phone number to confirm removal"
+    ]
+  }
+]
+```
+
+### Error Responses
+
+| Status | Description |
+|--------|-------------|
+| 400 | Invalid request (missing or malformed data) |
+| 401 | Unauthorized (not logged in) |
+| 429 | Rate limit exceeded |
+| 502 | External API error |
+| 503 | Service unavailable |
+| 504 | Request timeout |
 
 ---
 
@@ -469,11 +601,6 @@ Protection against brute-force attacks:
 | Lockout duration | 5 minutes (300 seconds) |
 | Storage | Database (persists across restarts) |
 
-```python
-# After 3 failed attempts:
-"Account locked for 5 minutes due to multiple failed attempts."
-```
-
 ### CSRF Protection
 
 All forms include CSRF tokens via Flask-WTF:
@@ -481,11 +608,6 @@ All forms include CSRF tokens via Flask-WTF:
 ```html
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 ```
-
-This prevents:
-- Cross-site request forgery attacks
-- Unauthorized form submissions
-- Session hijacking via forged requests
 
 ### Input Validation
 
@@ -507,12 +629,6 @@ Both client-side and server-side validation:
 - At least one uppercase letter
 - At least one lowercase letter
 - At least one number
-
-### Session Security
-
-- Server-side sessions using Flask's secure cookie implementation
-- Sessions cleared on logout
-- Secret key required for production (environment variable)
 
 ### k-Anonymity for Password Checking
 
@@ -540,13 +656,6 @@ Your password is NEVER sent to external services:
 | Rate Limit | Reasonable use policy |
 | Cost | Free |
 
-**Response Format:**
-```json
-{
-  "breaches": [["Adobe", "LinkedIn", "Dropbox"]]
-}
-```
-
 ### HIBP Pwned Passwords API
 
 **Purpose:** Password breach checking with k-anonymity
@@ -559,13 +668,6 @@ Your password is NEVER sent to external services:
 | Rate Limit | ~10 requests/second |
 | Cost | Free |
 
-**Response Format:**
-```
-1E4C9B93F3F0682250B6CF8331B7EE68FD8:3
-3D4F2BF07DC1BE38B20CD6E46949A1071F4:2
-...
-```
-
 ---
 
 ## Project Structure
@@ -574,7 +676,8 @@ Your password is NEVER sent to external services:
 FootPrint/
 |-- files/
 |   |-- app.py                    # Main Flask application
-|   |-- security.py               # Security utilities
+|   |-- database.py               # Database connection utilities
+|   |-- requirements.txt          # Python dependencies
 |   |-- static/
 |   |   |-- styles.css            # Landing page styles
 |   |   |-- dashboardStyles.css   # Dashboard styles
@@ -591,9 +694,11 @@ FootPrint/
 |   |   |-- dashboard.html        # Dashboard template
 |   |   |-- login.html            # Login modal template
 |   |   |-- signup.html           # Signup modal template
+|   |   |-- aboutus.html          # About page template
 |   |-- instance/
-|   |   |-- data.db               # SQLite database (auto-generated)
-|   |-- venv/                     # Python virtual environment
+|       |-- data.db               # SQLite database (local dev, auto-generated)
+|-- FootPrintDashboardDemo.gif    # Demo animation
+|-- render.yaml                   # Render deployment blueprint
 |-- README.md                     # This file
 ```
 
@@ -623,7 +728,7 @@ FootPrint/
     <td align="center">
       <strong>Vi Khang Tran</strong><br>
       <sub>Information Systems</sub><br>
-      <sub>Networking</sub>
+      <sub>Removal Protocol</sub>
     </td>
   </tr>
 </table>
@@ -640,7 +745,7 @@ lsof -i :5001
 kill -9 <PID>
 ```
 
-### Database Errors
+### Database Errors (Local Development)
 
 ```bash
 # Delete and recreate database
@@ -652,15 +757,22 @@ python app.py  # Database auto-creates on startup
 
 ```bash
 # Ensure virtual environment is activated
-source files/venv/bin/activate
+source venv/bin/activate
 
 # Reinstall dependencies
-pip install flask flask-sqlalchemy flask-wtf requests
+pip install -r files/requirements.txt
 ```
 
 ### Rate Limit Exceeded
 
 Wait 5 minutes for the lockout to expire, or manually clear the LoginAttempt table in the database.
+
+### Render Deployment Issues
+
+- Ensure `DATABASE_URL` environment variable is set
+- Check that `FLASK_SECRET_KEY` is configured
+- Verify Python version is 3.10+
+- Review Render logs for specific error messages
 
 ---
 
