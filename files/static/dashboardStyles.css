@@ -1411,27 +1411,6 @@ body.dark .breachTagList .breachToggleBtn:hover {
   font-weight: 500;
 }
 
-.providerActions {
-  flex-shrink: 0;
-}
-
-.statusDropdown {
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.statusDropdown:focus {
-  outline: none;
-  border-color: var(--orange);
-}
-
 .providerBody {
   display: flex;
   flex-direction: column;
@@ -1479,14 +1458,19 @@ body.dark .breachTagList .breachToggleBtn:hover {
 
 /* Status Badge */
 .statusBadge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.statusBadge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .statusBadge.status-not-started {
@@ -1604,16 +1588,6 @@ body.dark .providerEta {
   color: #aaaaaa;
 }
 
-body.dark .statusDropdown {
-  background: #2b2b2b;
-  color: #ffffff;
-  border-color: #555;
-}
-
-body.dark .statusDropdown:focus {
-  border-color: #ffd27f;
-}
-
 body.dark .optOutLink {
   background: #ffd27f;
   color: #000;
@@ -1698,13 +1672,8 @@ body.dark .summaryCompleted {
 
   .providerHeader {
     flex-direction: column;
+    align-items: flex-start;
     gap: 10px;
-  }
-
-  .statusBadge {
-    position: static;
-    align-self: flex-start;
-    margin-top: 10px;
   }
 
   .breachActionsDashboard {

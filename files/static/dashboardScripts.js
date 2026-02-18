@@ -490,12 +490,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <h4 class="providerName">${p.name}</h4>
                                 ${p.eta ? `<span class="providerEta">ETA: ${p.eta}</span>` : ''}
                             </div>
-                            <div class="providerActions">
-                                <select class="statusDropdown" data-provider-id="${p.id}">
-                                    <option value="Not started" ${currentStatus === "Not started" ? "selected" : ""}>Not started</option>
-                                    <option value="Submitted" ${currentStatus === "Submitted" ? "selected" : ""}>Submitted</option>
-                                    <option value="Completed" ${currentStatus === "Completed" ? "selected" : ""}>Completed</option>
-                                </select>
+                            <div class="statusBadge status-${currentStatus.toLowerCase().replace(' ', '-')}" data-provider-id="${p.id}" data-status="${currentStatus}">
+                                ${currentStatus.toUpperCase()}
                             </div>
                         </div>
                         <div class="providerBody">
@@ -518,14 +514,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (providersEl) {
                 providersEl.innerHTML = providersHTML;
 
-                // Add event listeners to status dropdowns
-                providersEl.querySelectorAll('.statusDropdown').forEach(dropdown => {
-                    dropdown.addEventListener('change', async (e) => {
+                // Add click listeners to status badges to cycle through statuses
+                providersEl.querySelectorAll('.statusBadge').forEach(badge => {
+                    badge.style.cursor = 'pointer';
+                    badge.title = 'Click to change status';
+                    badge.addEventListener('click', async (e) => {
                         const providerId = e.target.dataset.providerId;
-                        const newStatus = e.target.value;
+                        const currentStatus = e.target.dataset.status;
+
+                        // Cycle through statuses: Not started → Submitted → Completed → Not started
+                        const statusOrder = ['Not started', 'Submitted', 'Completed'];
+                        const currentIndex = statusOrder.indexOf(currentStatus);
+                        const newStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
 
                         try {
                             await postRemovalAction(providerId, newStatus);
+                            // Update badge appearance
+                            e.target.dataset.status = newStatus;
+                            e.target.className = `statusBadge status-${newStatus.toLowerCase().replace(' ', '-')}`;
+                            e.target.textContent = newStatus.toUpperCase();
                             // Refresh summary
                             const updatedSummary = await fetchRemovalSummary();
                             renderSummary(summaryEl, updatedSummary);
