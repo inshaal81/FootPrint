@@ -26,6 +26,11 @@ if not app.secret_key:
         raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
     app.secret_key = "dev-only-secret-key-local-only"
 
+# CSRF Configuration for production
+# Disable strict referer checking for HTTPS (Render deployment)
+app.config['WTF_CSRF_SSL_STRICT'] = False
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour token validity
+
 #Terry - modified (made more modular and flexible for larger Flask apps)
 csrf = CSRFProtect()
 csrf.init_app(app)
