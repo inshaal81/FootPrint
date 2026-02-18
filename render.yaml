@@ -1,11 +1,16 @@
+databases:
+  - name: footprint-db
+    databaseName: footprint
+    user: footprint
+    plan: free
+
 services:
   - type: web
     name: footprint
     runtime: python
     plan: free
-    rootDir: files
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    buildCommand: pip install -r files/requirements.txt
+    startCommand: cd files && gunicorn app:app
     envVars:
       - key: FLASK_SECRET_KEY
         generateValue: true
@@ -14,10 +19,4 @@ services:
           name: footprint-db
           property: connectionString
       - key: PYTHON_VERSION
-        value: "3.10.0"
-
-databases:
-  - name: footprint-db
-    plan: free
-    databaseName: footprint
-    user: footprint_user
+        value: 3.11.4
