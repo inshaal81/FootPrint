@@ -9,8 +9,8 @@ import re
 import hashlib
 import requests  # For HIBP API calls
 from datetime import datetime, timedelta
-#Terry added
-from tracker.activity import log_activity
+# Terry added - activity logging disabled for now (circular import issues in production)
+# from tracker.activity import log_activity
 from database import get_db
 
 
@@ -420,8 +420,8 @@ def login():
 
         session['user_id'] = user.id
         session['username'] = user.username
-        #added
-        log_activity("login")
+        # Activity logging disabled for now (circular import issues in production)
+        # log_activity("login")
         flash("Login successful!", "success")
 
         return redirect(url_for('dashboard'))
@@ -504,8 +504,8 @@ def dashboard():
 # ===== Logout =====
 @app.route("/logout")
 def logout():
-    #added
-    log_activity("logout")
+    # Activity logging disabled for now (circular import issues in production)
+    # log_activity("logout")
     session.clear()
     return redirect(url_for('home'))
 
@@ -1079,8 +1079,8 @@ def check_password_pwned():
 @app.route("/scan", methods=["POST"])
 def scan():
     domain = request.form["domain"]
-
-    log_activity("run_scan", domain)
+    # Activity logging disabled for now (circular import issues in production)
+    # log_activity("run_scan", domain)
     return redirect(url_for("dashboard"))
     # scan logic here
 
