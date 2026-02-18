@@ -1001,6 +1001,234 @@ body.dark .breachToggleBtn:hover {
   margin-bottom: 20px;
 }
 
+/* ===== Breach-Specific Actions Dashboard ===== */
+.breachActionsDashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 32px;
+  padding: 32px;
+  border: 2px solid #dc2626;
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.1);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.breachActionsBody {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.breachActionsBody h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.breachActionsBody .subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+#breachSpecificActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.breachActionCard {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.breachActionCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.breachActionCard.priority-high {
+  border-left: 4px solid #dc2626;
+}
+
+.breachActionCard.priority-medium {
+  border-left: 4px solid #f59e0b;
+}
+
+.breachActionCard.priority-low {
+  border-left: 4px solid #6b7280;
+}
+
+.breachActionHeader {
+  margin-bottom: 12px;
+}
+
+.breachActionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breachActionType {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.breachActionName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.breachActionPriority {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.priority-badge-high {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.priority-badge-medium {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.priority-badge-low {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.breachActionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.breachActionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+  width: fit-content;
+}
+
+.breachActionLink:hover {
+  background: #b91c1c;
+}
+
+.breachActionSteps {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.breachActionSteps strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.breachActionSteps ol {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+.breachActionSteps li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.noBreachActions {
+  color: var(--muted);
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Dark mode - Breach Actions Dashboard */
+body.dark .breachActionsDashboard {
+  background: #0a0a0a;
+  border-color: #f87171;
+}
+
+body.dark .breachActionsBody {
+  background: #121212;
+  border-color: #444;
+}
+
+body.dark .breachActionsBody h3 {
+  color: #f87171;
+}
+
+body.dark .breachActionCard {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .breachActionCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .breachActionName {
+  color: #ffffff;
+}
+
+body.dark .breachActionType {
+  color: #aaaaaa;
+}
+
+body.dark .breachActionLink {
+  background: #ef4444;
+}
+
+body.dark .breachActionLink:hover {
+  background: #dc2626;
+}
+
+body.dark .breachActionSteps {
+  color: #aaaaaa;
+}
+
+body.dark .breachActionSteps strong {
+  color: #e0e0e0;
+}
+
+body.dark .priority-badge-high {
+  background: #3f1a1a;
+  color: #fca5a5;
+}
+
+body.dark .priority-badge-medium {
+  background: #3f2a0a;
+  color: #fcd34d;
+}
+
+body.dark .priority-badge-low {
+  background: #2a2a2a;
+  color: #9ca3af;
+}
+
 /* ===== Providers Dashboard (Separate Section) ===== */
 .providersDashboard {
   width: 100%;
@@ -1475,6 +1703,20 @@ body.dark .summaryCompleted {
     position: static;
     align-self: flex-start;
     margin-top: 10px;
+  }
+
+  .breachActionsDashboard {
+    margin-top: 24px;
+    padding: 20px;
+  }
+
+  .breachActionsBody {
+    padding: 20px;
+  }
+
+  .breachActionHeader {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .providersDashboard {

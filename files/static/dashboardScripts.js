@@ -335,11 +335,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function fetchBreachActions(breaches) {
+        const res = await fetch("/api/removal/breach-actions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ breaches })
+        });
+        if (!res.ok) throw new Error("Failed to load breach actions");
+        return res.json();
+    }
+
     async function renderRemovalProtocol(breaches) {
         // New structure: breaches + summary in left column, providers in separate dashboard
         const summarySection = document.getElementById("removalProtocolSummary");
         const breachesListEl = document.getElementById("removalBreachesList");
         const summaryEl = document.getElementById("removalSummary");
+        const breachActionsDashboard = document.getElementById("breachActionsDashboard");
+        const breachActionsEl = document.getElementById("breachSpecificActions");
         const providersDashboard = document.getElementById("providersDashboard");
         const providersEl = document.getElementById("removalProviders");
 
@@ -347,6 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show the left column summary section
         if (summarySection) summarySection.style.display = "block";
+        // Show the breach-specific actions dashboard
+        if (breachActionsDashboard) breachActionsDashboard.style.display = "block";
         // Show the providers dashboard
         if (providersDashboard) providersDashboard.style.display = "block";
 
@@ -356,12 +370,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (providersEl) {
             providersEl.innerHTML = '<p class="removalLoading">Loading removal options...</p>';
         }
+        if (breachActionsEl) {
+            breachActionsEl.innerHTML = '<p class="removalLoading">Loading breach-specific actions...</p>';
+        }
 
         try {
-            // Fetch providers and summary in parallel
-            const [providers, summary] = await Promise.all([
+            // Fetch providers, summary, and breach-specific actions in parallel
+            const [providers, summary, breachActionsData] = await Promise.all([
                 fetchRemovalProviders(),
-                fetchRemovalSummary()
+                fetchRemovalSummary(),
+                fetchBreachActions(breaches)
             ]);
 
             // Build a map of latest status per provider from summary
@@ -420,6 +438,44 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
+            }
+
+            // Render breach-specific actions (high priority - shown first)
+            const breachActions = breachActionsData.actions || [];
+            if (breachActionsEl && breachActions.length > 0) {
+                const breachActionsHTML = breachActions.map(action => {
+                    const priorityClass = action.priority === 'high' ? 'priority-high' :
+                                         action.priority === 'medium' ? 'priority-medium' : 'priority-low';
+                    const actionTypeLabel = action.action_type === 'account_security' ? '🔐 Security Action' :
+                                           action.action_type === 'account_deletion' ? '🗑️ Account Deletion' : '⚠️ Action Required';
+
+                    return `
+                        <div class="breachActionCard ${priorityClass}">
+                            <div class="breachActionHeader">
+                                <div class="breachActionInfo">
+                                    <span class="breachActionType">${actionTypeLabel}</span>
+                                    <h4 class="breachActionName">${action.company}</h4>
+                                    <span class="breachActionPriority priority-badge-${action.priority}">${action.priority.toUpperCase()} PRIORITY</span>
+                                </div>
+                            </div>
+                            <div class="breachActionBody">
+                                <a href="${action.url}" target="_blank" rel="noopener noreferrer" class="breachActionLink">
+                                    Go to Security Settings
+                                </a>
+                                <div class="breachActionSteps">
+                                    <strong>Recommended Steps:</strong>
+                                    <ol>
+                                        ${action.steps.map(step => `<li>${step}</li>`).join('')}
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                breachActionsEl.innerHTML = breachActionsHTML;
+            } else if (breachActionsEl) {
+                breachActionsEl.innerHTML = '<p class="noBreachActions">No specific remediation actions found for these breaches. Follow the data broker removal steps below.</p>';
             }
 
             // Render provider cards in the SEPARATE dashboard below

@@ -166,26 +166,187 @@ with app.app_context():
         conn.commit()
     if RemovalProvider.query.count() == 0:
         providers = [
+            # Tier 1: High Priority People-Search Sites
             RemovalProvider(
                 id="whitepages",
                 name="Whitepages",
                 opt_out_url="https://www.whitepages.com/suppression-requests",
-                eta="7–14 days",
+                eta="1-7 days",
                 steps_json=json.dumps([
-                    "Open the suppression request page",
-                    "Search for your listing",
-                    "Submit the request and confirm if prompted"
+                    "Search for your listing on the suppression page",
+                    "Select your record from the results",
+                    "Verify via phone number to confirm removal"
                 ])
             ),
             RemovalProvider(
                 id="spokeo",
                 name="Spokeo",
                 opt_out_url="https://www.spokeo.com/optout",
-                eta="3–10 days",
+                eta="3-10 days",
                 steps_json=json.dumps([
-                    "Open the opt-out page",
-                    "Find your profile",
-                    "Submit request and verify via email"
+                    "Search for your profile on Spokeo.com",
+                    "Copy your profile URL",
+                    "Paste URL in opt-out form and enter email",
+                    "Click confirmation link in email"
+                ])
+            ),
+            RemovalProvider(
+                id="beenverified",
+                name="BeenVerified",
+                opt_out_url="https://www.beenverified.com/f/optout/search",
+                eta="24-48 hours",
+                steps_json=json.dumps([
+                    "Search for your name and state",
+                    "Find your listing and click the arrow",
+                    "Enter your email and complete CAPTCHA",
+                    "Verify via email confirmation link"
+                ])
+            ),
+            RemovalProvider(
+                id="intelius",
+                name="Intelius",
+                opt_out_url="https://www.intelius.com/opt-out",
+                eta="72 hours",
+                steps_json=json.dumps([
+                    "Search for your profile on Intelius.com",
+                    "Copy your profile URL",
+                    "Paste URL in the opt-out form",
+                    "Verify your request via email"
+                ])
+            ),
+            RemovalProvider(
+                id="radaris",
+                name="Radaris",
+                opt_out_url="https://radaris.com/control/privacy",
+                eta="24-48 hours",
+                steps_json=json.dumps([
+                    "Search for your listing on Radaris.com",
+                    "Click 'Full Profile' to open your record",
+                    "Copy the profile URL",
+                    "Submit URL in the privacy control form",
+                    "Verify via email"
+                ])
+            ),
+            RemovalProvider(
+                id="peoplefinders",
+                name="PeopleFinders",
+                opt_out_url="https://www.peoplefinders.com/opt-out",
+                eta="5-7 days",
+                steps_json=json.dumps([
+                    "Search for your profile on PeopleFinders.com",
+                    "Copy your profile URL",
+                    "Paste URL in the opt-out form",
+                    "Enter email and solve CAPTCHA",
+                    "Confirm via email"
+                ])
+            ),
+            RemovalProvider(
+                id="mylife",
+                name="MyLife",
+                opt_out_url="https://www.mylife.com/ccpa/index.pubview",
+                eta="7-14 days",
+                steps_json=json.dumps([
+                    "Go to MyLife CCPA opt-out page",
+                    "Submit your name and profile URL",
+                    "Or email privacy@mylife.com with your details",
+                    "Wait for confirmation"
+                ])
+            ),
+            RemovalProvider(
+                id="fastpeoplesearch",
+                name="FastPeopleSearch",
+                opt_out_url="https://www.fastpeoplesearch.com/removal",
+                eta="72 hours",
+                steps_json=json.dumps([
+                    "Search your name on FastPeopleSearch.com",
+                    "Find your listing and click View Free Details",
+                    "Scroll down and click 'Remove My Record'",
+                    "Complete the CAPTCHA and confirm"
+                ])
+            ),
+            RemovalProvider(
+                id="nuwber",
+                name="Nuwber",
+                opt_out_url="https://nuwber.com/removal/link",
+                eta="3-5 days",
+                steps_json=json.dumps([
+                    "Search for your profile on Nuwber.com",
+                    "Copy your profile URL",
+                    "Submit the URL in the removal form",
+                    "Confirm via email"
+                ])
+            ),
+            # Tier 2: Parent Companies (cover multiple sites)
+            RemovalProvider(
+                id="peopleconnect",
+                name="PeopleConnect (TruthFinder/InstantCheckmate)",
+                opt_out_url="https://suppression.peopleconnect.us/login",
+                eta="48-72 hours",
+                steps_json=json.dumps([
+                    "Go to PeopleConnect suppression center",
+                    "Create an account or log in",
+                    "Submit your suppression request",
+                    "This covers TruthFinder, InstantCheckmate, USSearch, and Intelius"
+                ])
+            ),
+            RemovalProvider(
+                id="acxiom",
+                name="Acxiom (Major Data Aggregator)",
+                opt_out_url="https://isapps.acxiom.com/optout/optout.aspx",
+                eta="7-30 days",
+                steps_json=json.dumps([
+                    "Fill in your personal information",
+                    "Submit the opt-out form",
+                    "Acxiom supplies data to thousands of sites",
+                    "Opting out here has wide-reaching effects"
+                ])
+            ),
+            RemovalProvider(
+                id="lexisnexis",
+                name="LexisNexis",
+                opt_out_url="https://consumer.risk.lexisnexis.com/request",
+                eta="7-14 days",
+                steps_json=json.dumps([
+                    "Request your personal data file first",
+                    "Review what data they have on you",
+                    "Submit opt-out request",
+                    "Follow up if needed"
+                ])
+            ),
+            # Tier 3: Additional Brokers
+            RemovalProvider(
+                id="thatsthem",
+                name="That's Them",
+                opt_out_url="https://thatsthem.com/optout",
+                eta="24-48 hours",
+                steps_json=json.dumps([
+                    "Search for your record on ThatsThem.com",
+                    "Copy the record URL",
+                    "Submit opt-out request with the URL",
+                    "Confirm via email"
+                ])
+            ),
+            RemovalProvider(
+                id="familytreenow",
+                name="FamilyTreeNow",
+                opt_out_url="https://www.familytreenow.com/optout",
+                eta="24-48 hours",
+                steps_json=json.dumps([
+                    "Search for your name on FamilyTreeNow.com",
+                    "Find your record",
+                    "Click opt-out and confirm your identity"
+                ])
+            ),
+            RemovalProvider(
+                id="usphonebook",
+                name="USPhoneBook",
+                opt_out_url="https://www.usphonebook.com/opt-out",
+                eta="24-48 hours",
+                steps_json=json.dumps([
+                    "Search for your listing",
+                    "Find your record and click it",
+                    "Click the opt-out link",
+                    "Confirm removal"
                 ])
             )
         ]
@@ -448,6 +609,340 @@ def get_reviews():
         }
         for r in reviews
     ])
+
+
+# Breach-specific remediation actions mapping
+# Maps breach names (from XposedOrNot API) to recommended security actions
+BREACH_ACTIONS = {
+    "LinkedIn": {
+        "action_type": "account_security",
+        "priority": "high",
+        "company": "LinkedIn",
+        "url": "https://www.linkedin.com/psettings/security",
+        "steps": [
+            "Change your LinkedIn password immediately",
+            "Enable two-factor authentication in Security Settings",
+            "Review all connected third-party apps",
+            "Check active sessions and sign out unrecognized devices",
+            "Request a copy of your data at Settings > Data Privacy"
+        ]
+    },
+    "Adobe": {
+        "action_type": "account_security",
+        "priority": "high",
+        "company": "Adobe",
+        "url": "https://account.adobe.com/security",
+        "steps": [
+            "Change your Adobe account password",
+            "Enable two-step verification",
+            "Check if you use this password elsewhere and change those too",
+            "Review connected apps under Account > Privacy"
+        ]
+    },
+    "Dropbox": {
+        "action_type": "account_security",
+        "priority": "high",
+        "company": "Dropbox",
+        "url": "https://www.dropbox.com/account/security",
+        "steps": [
+            "Change your Dropbox password immediately",
+            "Enable two-step verification",
+            "Go to Security > Active sessions and end unfamiliar sessions",
+            "Review linked apps and revoke unrecognized ones"
+        ]
+    },
+    "Twitter": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "X (Twitter)",
+        "url": "https://twitter.com/settings/security",
+        "steps": [
+            "Change your X (Twitter) password",
+            "Enable two-factor authentication",
+            "Review apps with account access and revoke untrusted ones",
+            "Check recent login history for unfamiliar activity"
+        ]
+    },
+    "Facebook": {
+        "action_type": "account_security",
+        "priority": "high",
+        "company": "Facebook",
+        "url": "https://www.facebook.com/settings?tab=security",
+        "steps": [
+            "Change your Facebook password immediately",
+            "Enable two-factor authentication",
+            "Review active sessions in Security Settings",
+            "Check connected apps and remove suspicious ones"
+        ]
+    },
+    "MySpace": {
+        "action_type": "account_deletion",
+        "priority": "low",
+        "company": "MySpace",
+        "url": "https://help.myspace.com/hc/en-us/articles/202241380",
+        "steps": [
+            "Log in to your MySpace account (desktop only)",
+            "Go to Settings",
+            "Click Delete Account",
+            "Select a reason and confirm deletion"
+        ]
+    },
+    "Canva": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Canva",
+        "url": "https://www.canva.com/settings/account",
+        "steps": [
+            "Change your Canva password immediately",
+            "Go to Account Settings > Login & Security",
+            "Enable two-factor authentication",
+            "If no longer using, delete account (takes up to 14 days)"
+        ]
+    },
+    "Deezer": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Deezer",
+        "url": "https://www.deezer.com/account/",
+        "steps": [
+            "Change your Deezer password",
+            "Review account settings",
+            "Submit GDPR data deletion request if needed"
+        ]
+    },
+    "Dailymotion": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Dailymotion",
+        "url": "https://www.dailymotion.com/settings/security",
+        "steps": [
+            "Change your Dailymotion password",
+            "Contact privacy@dailymotion.com for data deletion"
+        ]
+    },
+    "Tumblr": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Tumblr",
+        "url": "https://www.tumblr.com/settings/account",
+        "steps": [
+            "Change your Tumblr password",
+            "Enable two-factor authentication",
+            "Review connected apps"
+        ]
+    },
+    "Zynga": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Zynga",
+        "url": "https://www.zynga.com/privacy/",
+        "steps": [
+            "Change your Zynga password",
+            "Review connected social accounts",
+            "Submit deletion request via privacy portal if needed"
+        ]
+    },
+    "Bitly": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Bitly",
+        "url": "https://app.bitly.com/settings/",
+        "steps": [
+            "Change your Bitly password",
+            "Enable two-factor authentication",
+            "Review API access tokens"
+        ]
+    },
+    "Disqus": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Disqus",
+        "url": "https://disqus.com/home/settings/",
+        "steps": [
+            "Change your Disqus password",
+            "Review account settings",
+            "Delete account if no longer needed"
+        ]
+    },
+    "Imgur": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Imgur",
+        "url": "https://imgur.com/account/settings",
+        "steps": [
+            "Change your Imgur password",
+            "Enable two-factor authentication",
+            "Review connected apps"
+        ]
+    },
+    "Kickstarter": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Kickstarter",
+        "url": "https://www.kickstarter.com/settings/account",
+        "steps": [
+            "Change your Kickstarter password",
+            "Enable two-factor authentication",
+            "Review saved payment methods"
+        ]
+    },
+    "Last.fm": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Last.fm",
+        "url": "https://www.last.fm/settings",
+        "steps": [
+            "Change your Last.fm password",
+            "Review connected applications"
+        ]
+    },
+    "Patreon": {
+        "action_type": "account_security",
+        "priority": "high",
+        "company": "Patreon",
+        "url": "https://www.patreon.com/settings/security",
+        "steps": [
+            "Change your Patreon password immediately",
+            "Enable two-factor authentication",
+            "Review payment methods and subscriptions",
+            "Check connected social accounts"
+        ]
+    },
+    "Snapchat": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Snapchat",
+        "url": "https://accounts.snapchat.com/accounts/login",
+        "steps": [
+            "Change your Snapchat password",
+            "Enable two-factor authentication",
+            "Review connected devices"
+        ]
+    },
+    "Spotify": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Spotify",
+        "url": "https://www.spotify.com/account/",
+        "steps": [
+            "Change your Spotify password",
+            "Click 'Sign out everywhere'",
+            "Review connected apps",
+            "Check Family/Duo members if applicable"
+        ]
+    },
+    "Trello": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "Trello",
+        "url": "https://trello.com/your/account",
+        "steps": [
+            "Change your Trello password",
+            "Enable two-factor authentication",
+            "Review Power-Ups and connected apps",
+            "Check team/workspace access"
+        ]
+    },
+    "Dubsmash": {
+        "action_type": "account_deletion",
+        "priority": "low",
+        "company": "Dubsmash",
+        "url": "https://dubsmash.com/",
+        "steps": [
+            "Service was acquired by Reddit",
+            "Delete your Dubsmash account if still accessible",
+            "Change password if you used it elsewhere"
+        ]
+    },
+    "Evite": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Evite",
+        "url": "https://www.evite.com/account",
+        "steps": [
+            "Change your Evite password",
+            "Review account settings",
+            "Delete account if no longer needed"
+        ]
+    },
+    "Houzz": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Houzz",
+        "url": "https://www.houzz.com/user/settings",
+        "steps": [
+            "Change your Houzz password",
+            "Review connected accounts",
+            "Update profile privacy settings"
+        ]
+    },
+    "MyFitnessPal": {
+        "action_type": "account_security",
+        "priority": "medium",
+        "company": "MyFitnessPal",
+        "url": "https://www.myfitnesspal.com/account",
+        "steps": [
+            "Change your MyFitnessPal password",
+            "Review connected apps and devices",
+            "Check diary privacy settings"
+        ]
+    },
+    "Wattpad": {
+        "action_type": "account_security",
+        "priority": "low",
+        "company": "Wattpad",
+        "url": "https://www.wattpad.com/settings",
+        "steps": [
+            "Change your Wattpad password",
+            "Enable two-factor authentication",
+            "Review account privacy settings"
+        ]
+    }
+}
+
+# API endpoint for breach-specific actions
+@app.route("/api/removal/breach-actions", methods=["POST"])
+@csrf.exempt
+def api_breach_actions():
+    """
+    Given a list of breach names, return matching remediation actions.
+    Only returns actions for breaches that have specific remediation steps.
+    """
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(force=True)
+    breaches = data.get("breaches", [])
+
+    if not isinstance(breaches, list):
+        return jsonify({"error": "breaches must be a list"}), 400
+
+    # Find matching actions for the provided breach names
+    matched_actions = []
+    for breach_name in breaches:
+        # Try exact match first
+        if breach_name in BREACH_ACTIONS:
+            action = BREACH_ACTIONS[breach_name].copy()
+            action["breach_name"] = breach_name
+            matched_actions.append(action)
+        else:
+            # Try case-insensitive match
+            for key in BREACH_ACTIONS:
+                if key.lower() == breach_name.lower():
+                    action = BREACH_ACTIONS[key].copy()
+                    action["breach_name"] = breach_name
+                    matched_actions.append(action)
+                    break
+
+    # Sort by priority (high > medium > low)
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    matched_actions.sort(key=lambda x: priority_order.get(x.get("priority", "low"), 2))
+
+    return jsonify({
+        "actions": matched_actions,
+        "total_breaches": len(breaches),
+        "matched_count": len(matched_actions)
+    })
 
 
 #Inshaal - XposedOrNot API Proxy (FREE email breach checking)
