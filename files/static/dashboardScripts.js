@@ -511,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             ` : ''}
                         </div>
-                        <div class="statusBadge status-${currentStatus.toLowerCase().replace(' ', '-')}">${currentStatus}</div>
                     </div>
                 `;
             }).join('');
@@ -524,14 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     dropdown.addEventListener('change', async (e) => {
                         const providerId = e.target.dataset.providerId;
                         const newStatus = e.target.value;
-                        const card = e.target.closest('.providerCard');
-                        const badge = card.querySelector('.statusBadge');
 
                         try {
                             await postRemovalAction(providerId, newStatus);
-                            // Update the badge
-                            badge.className = `statusBadge status-${newStatus.toLowerCase().replace(' ', '-')}`;
-                            badge.textContent = newStatus;
                             // Refresh summary
                             const updatedSummary = await fetchRemovalSummary();
                             renderSummary(summaryEl, updatedSummary);
