@@ -1490,8 +1490,9 @@ body.dark .breachTagList .breachToggleBtn:hover {
 }
 
 .statusBadge.status-not-started {
-  background: #e5e7eb;
+  background: transparent;
   color: #6b7280;
+  border: 1px solid #d1d5db;
 }
 
 .statusBadge.status-submitted {
@@ -1631,8 +1632,9 @@ body.dark .providerSteps strong {
 }
 
 body.dark .statusBadge.status-not-started {
-  background: #374151;
+  background: transparent;
   color: #9ca3af;
+  border: 1px solid #4b5563;
 }
 
 body.dark .statusBadge.status-submitted {
