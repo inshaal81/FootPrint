@@ -19,12 +19,12 @@ from database import get_db
 #  Create ONE Flask app (Terry)
 app = Flask(__name__, static_folder='static')
 
+#Terry modified
 # ===== Secure Secret Key =====
-app.secret_key = os.environ.get("FLASK_SECRET_KEY")
-if not app.secret_key:
-    if os.environ.get("RENDER"):
-        raise RuntimeError("FLASK_SECRET_KEY must be set in production!")
-    app.secret_key = "dev-only-secret-key-local-only"
+app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
+
+if not app.config["SECRET_KEY"]:
+    raise RuntimeError("FLASK_SECRET_KEY environment variable is required.")
 
 # CSRF Configuration for production
 # Disable strict referer checking for HTTPS (Render deployment)
