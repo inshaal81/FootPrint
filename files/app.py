@@ -132,7 +132,6 @@ class Review(db.Model):
     comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
 #Terry modified
 # Create tables
 with app.app_context():
@@ -504,6 +503,15 @@ def dashboard():
         return redirect(url_for('home'))
     username = session.get('username', 'User')
     return render_template("dashboard.html", username=username)
+
+#Trung Nguyen
+# ===== Ratings Page (shows all reviews for a URL) =====
+@app.route("/ratings")
+def ratings_page():
+    if 'user_id' not in session:
+        return redirect(url_for('home'))
+    username = session.get('username', 'User')
+    return render_template("ratings.html", username=username)
 
 # ===== Logout =====
 @app.route("/logout")
@@ -1101,3 +1109,128 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     app.run(debug=debug, host="0.0.0.0", port=port)
+
+#Trung Nguyen
+# ===== URL Reviews API (store + fetch + summaries) =====
+
+@app.route("/api/url-reviews", methods=["POST"])
+@csrf.exempt
+def api_create_url_review():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(force=True)
+    url = (data.get("url") or "").strip()
+    rating = data.get("rating")
+    comment = (data.get("comment") or "").strip()
+
+    if not url:
+        return jsonify({"error": "url is required"}), 400
+    if not isinstance(rating, int) or rating < 1 or rating > 5:
+        return jsonify({"error": "rating must be an integer 1-5"}), 400
+    if len(comment) < 3:
+        return jsonify({"error": "comment must be at least 3 characters"}), 400
+
+    r = UrlReview(
+        user_id=session["user_id"],
+        url=url,
+        rating=rating,
+        comment=comment
+    )
+    db.session.add(r)
+    db.session.commit()
+
+    return jsonify({"ok": True})
+
+
+@app.route("/api/url-reviews", methods=["GET"])
+def api_get_url_reviews():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    url = (request.args.get("url") or "").strip()
+    if not url:
+        return jsonify({"error": "url is required"}), 400
+
+    # optional limit
+    try:
+        limit = int(request.args.get("limit") or "50")
+    except ValueError:
+        limit = 50
+    limit = max(1, min(limit, 200))
+
+    # join to get usernames
+    rows = (db.session.query(UrlReview, User.username)
+            .join(User, UrlReview.user_id == User.id)
+            .filter(UrlReview.url == url)
+            .order_by(UrlReview.created_at.desc())
+            .limit(limit)
+            .all())
+
+    # summary stats
+    avg_row = (db.session.query(db.func.avg(UrlReview.rating), db.func.count(UrlReview.id))
+               .filter(UrlReview.url == url)
+               .first())
+    avg_rating = float(avg_row[0]) if avg_row and avg_row[0] is not None else 0.0
+    count = int(avg_row[1]) if avg_row and avg_row[1] is not None else 0
+
+    return jsonify({
+        "url": url,
+        "avg_rating": round(avg_rating, 2),
+        "review_count": count,
+        "reviews": [
+            {
+                "rating": r.rating,
+                "comment": r.comment,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "username": username
+            }
+            for (r, username) in rows
+        ]
+    })
+
+
+@app.route("/api/url-review-summaries", methods=["POST"])
+@csrf.exempt
+def api_url_review_summaries():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(force=True)
+    urls = data.get("urls", [])
+
+    if not isinstance(urls, list):
+        return jsonify({"error": "urls must be a list"}), 400
+
+    # sanitize + unique
+    clean_urls = []
+    seen = set()
+    for u in urls:
+        if not isinstance(u, str):
+            continue
+        u = u.strip()
+        if not u or u in seen:
+            continue
+        seen.add(u)
+        clean_urls.append(u)
+
+    if not clean_urls:
+        return jsonify({"summaries": {}})
+
+    rows = (db.session.query(
+                UrlReview.url,
+                db.func.avg(UrlReview.rating),
+                db.func.count(UrlReview.id)
+            )
+            .filter(UrlReview.url.in_(clean_urls))
+            .group_by(UrlReview.url)
+            .all())
+
+    summary_map = {u: {"avg": 0.0, "count": 0} for u in clean_urls}
+    for (u, avg, cnt) in rows:
+        summary_map[u] = {
+            "avg": float(avg) if avg is not None else 0.0,
+            "count": int(cnt) if cnt is not None else 0
+        }
+
+    return jsonify({"summaries": summary_map})

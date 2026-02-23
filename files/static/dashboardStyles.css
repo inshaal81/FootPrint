@@ -145,7 +145,6 @@ body {
   max-width: 1400px;
   padding: 32px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 32px;
   position: relative;
   border: 2px solid var(--orange);
@@ -1699,3 +1698,676 @@ body.dark .summaryCompleted {
     padding: 20px;
   }
 }
+
+
+
+/* Trung - Review Dashboard */
+/* ============================
+   NEW: 3-column dashboard layout
+   ============================ */
+.dashboardBody {
+  grid-template-columns: 1fr 1fr 360px;
+  align-items: stretch;
+}
+
+/* ============================
+   NEW: Rating Sidebar
+   ============================ */
+.ratingSidebar {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  min-height: 825px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.ratingSidebarHeader h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.ratingSidebarControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ratingSidebarControls label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ratingSidebarControls select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.ratingSidebarControls select:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(244, 122, 20, 0.1);
+}
+
+/* Empty state */
+.sidebarEmptyState {
+  background: var(--bg);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--muted);
+}
+.sidebarEmptyState strong {
+  color: var(--text);
+}
+.sidebarEmptyState p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* List */
+.sidebarRatingList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+/* Item */
+.sidebarRatingItem {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.sidebarRatingItem:hover {
+  border-color: rgba(244, 122, 20, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.sidebarRatingItem.selected {
+  border-color: var(--orange);
+  box-shadow: 0 6px 20px rgba(244, 122, 20, 0.18);
+}
+
+/* Placeholder thumbnail */
+.sidebarRatingThumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
+  border: 1px solid var(--line);
+}
+
+/* Title/meta */
+.sidebarRatingTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebarRatingUrl {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebarRatingStars {
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #f59e0b;
+  margin-bottom: 6px;
+}
+
+.sidebarRatingMeta {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Button */
+.sidebarViewBtn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebarViewBtn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(244, 122, 20, 0.06);
+}
+
+/* ============================
+   NEW: Write Review Box
+   ============================ */
+.writeReviewBox {
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.writeReviewTitle {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.selectedSiteLabel {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.writeReviewGroup {
+  margin-bottom: 12px;
+}
+
+.writeReviewGroup label {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.writeReviewGroup select,
+.writeReviewGroup textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.writeReviewGroup textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.writeReviewGroup select:focus,
+.writeReviewGroup textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(244, 122, 20, 0.1);
+}
+
+.submitReviewBtn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--orange);
+  color: var(--cta-text);
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitReviewBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitReviewBtn:not(:disabled):hover {
+  background: #e06d0f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 122, 20, 0.3);
+}
+
+.reviewMsg {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  min-height: 18px;
+}
+
+/* ============================
+   Dark mode for sidebar
+   ============================ */
+body.dark .ratingSidebar {
+  background: #121212;
+  border-color: #444;
+}
+
+body.dark .sidebarEmptyState {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .sidebarEmptyState strong {
+  color: #ffffff;
+}
+
+body.dark .ratingSidebarHeader h3 {
+  color: #ffffff;
+}
+
+body.dark .ratingSidebarControls label {
+  color: #aaaaaa;
+}
+
+body.dark .ratingSidebarControls select {
+  background: #1a1a1a;
+  border-color: #444;
+  color: #ffffff;
+}
+
+body.dark .sidebarRatingItem {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .sidebarRatingThumb {
+  background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+  border-color: #444;
+}
+
+body.dark .sidebarRatingTitle {
+  color: #ffffff;
+}
+
+body.dark .sidebarRatingUrl,
+body.dark .sidebarRatingMeta,
+body.dark .selectedSiteLabel,
+body.dark .reviewMsg,
+body.dark .writeReviewGroup label {
+  color: #aaaaaa;
+}
+
+body.dark .writeReviewBox {
+  border-top-color: #444;
+}
+
+body.dark .writeReviewTitle {
+  color: #ffffff;
+}
+
+body.dark .writeReviewGroup select,
+body.dark .writeReviewGroup textarea {
+  background: #1a1a1a;
+  border-color: #444;
+  color: #ffffff;
+}
+
+body.dark .submitReviewBtn {
+  background: #ffd27f;
+  color: #000;
+}
+
+body.dark .submitReviewBtn:not(:disabled):hover {
+  background: #ffbc47;
+}
+
+/* ============================
+   Responsive: stack on smaller screens
+   ============================ */
+@media (max-width: 1100px) {
+  .dashboardBody {
+    grid-template-columns: 1fr;
+  }
+
+  .ratingSidebar {
+    min-height: auto;
+  }
+}
+
+/* Trung Nguyen - Ratings page (filters + list) */
+
+.backBtn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.backBtn:hover {
+  background: var(--bg);
+}
+
+/* Ratings page container */
+.ratingsContainer {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.ratingsGrid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+/* Cards */
+.ratingsFilterCard,
+.ratingsMainCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+/* Filter */
+.ratingsFilterCard h4 {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.filterRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text);
+}
+.filterRow:hover {
+  background: rgba(0,0,0,0.03);
+}
+.filterRow span {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Top bar */
+.ratingsTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.ratingsTitle {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+.ratingsSub {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.ratingsSort label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+.ratingsSort select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Summary */
+.ratingsSummaryLine {
+  padding: 12px 0;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* Review list item */
+.ratingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 6px;
+}
+.reviewRow {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  align-items: start;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+.reviewThumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
+  border: 1px solid var(--line);
+}
+.reviewHeaderLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.reviewUser {
+  font-weight: 900;
+  color: var(--text);
+  font-size: 14px;
+}
+.reviewDate {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.reviewStarsLine {
+  color: #f59e0b;
+  letter-spacing: 1px;
+  font-weight: 900;
+  margin: 6px 0;
+}
+.reviewComment {
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.ratingsEmpty {
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+/* Dark mode */
+body.dark .ratingsFilterCard,
+body.dark .ratingsMainCard {
+  background: #121212;
+  border-color: #444;
+}
+body.dark .filterRow:hover {
+  background: rgba(255,255,255,0.05);
+}
+body.dark .reviewRow {
+  background: #1a1a1a;
+  border-color: #444;
+}
+body.dark .reviewThumb {
+  background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+  border-color: #444;
+}
+body.dark .ratingsTopBar {
+  border-bottom-color: #444;
+}
+body.dark .ratingsSort select {
+  background: #1a1a1a;
+  border-color: #444;
+  color: #fff;
+}
+body.dark .reviewComment,
+body.dark .reviewUser,
+body.dark .ratingsTitle {
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .ratingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Trung Nguyen - Review preview inside sidebar */
+.selectedReviewsPreview {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+  display: none; /* shown only when a site is selected */
+}
+
+.reviewPreviewItem {
+  border-radius: 10px;
+  padding: 8px;
+  border: 1px solid transparent;
+}
+
+.reviewPreviewStars {
+  color: #f59e0b;
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.reviewPreviewText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.reviewPreviewMeta {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+body.dark .selectedReviewsPreview {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+body.dark .reviewPreviewText {
+  color: #ffffff;
+}
+
+body.dark .reviewPreviewMeta {
+  color: #aaaaaa;
+}
+
+/* ============================
+   Trung Nguyen — UI fixes
+   1) Ratings list shows ~7 items then scroll
+   2) Left column stops “stretch spacing” + aligns content top
+   3) Move View button to bottom of each rating card
+   4) Make orange dashboard box wider
+   ============================ */
+
+/* (4) Expand orange box (dashboard border container) */
+.dashboardBody {
+  max-width: 1600px; /* was 1400px */
+  align-items: start; /* prevents grid items stretching weirdly */
+}
+
+/* (2) Stop left column form from spreading too much */
+.inputCard form {
+  justify-content: flex-start; /* override space-between */
+}
+
+/* (1) Ratings list: show about 7 cards then scroll for the rest */
+.sidebarRatingList {
+  max-height: 560px;   /* ~7 items (adjust up/down if needed) */
+  overflow-y: auto;
+}
+
+/* Keep the write-review box pinned to bottom of sidebar */
+.writeReviewBox {
+  margin-top: auto;
+}
+
+/* (3) Put View button at the bottom of each rating card */
+.sidebarRatingItem {
+  grid-template-columns: 56px 1fr; /* remove the “auto” right-side column */
+  align-items: start;
+}
+
+.sidebarRatingAction {
+  grid-column: 1 / -1;            /* move action row to new line */
+  display: flex;
+  justify-content: flex-end;      /* button on bottom-right */
+  margin-top: 10px;
+}
+
+/* optional: make button a bit more “footer-like” */
+.sidebarViewBtn {
+  padding: 10px 16px;
+}
+
+/* Trung Nguyen — prevent long URLs from overflowing cards */
+.sidebarRatingUrl {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* If your URL is inside another wrapper, this helps too */
+.sidebarRatingInfo {
+  min-width: 0; /* important for ellipsis to work inside grid/flex */
+}
+

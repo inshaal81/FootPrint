@@ -582,4 +582,455 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
+// ==================================================
+// Trung Nguyen — Ratings Sidebar (DB-backed by URL)
+// - scanned URLs stored locally (list only)
+// - ratings/comments stored in DB using /api/url-reviews
+// - clicking a site shows preview (top 2 reviews)
+// - View opens internal page: /ratings?url=...
+// ==================================================
+(function TrungRatingsDB() {
+  const form = document.getElementById("breachCheckForm");
+  const urlInput = document.getElementById("websiteURL");
+
+  const ratingListEl = document.getElementById("sidebarRatingList");
+  const emptyStateEl = document.getElementById("sidebarEmptyState");
+  const sortSelect = document.getElementById("sidebarSort");
+
+  const selectedSiteLabel = document.getElementById("selectedSiteLabel");
+  const previewEl = document.getElementById("selectedReviewsPreview");
+
+  const reviewStars = document.getElementById("reviewStars");
+  const reviewText = document.getElementById("reviewText");
+  const submitReviewBtn = document.getElementById("submitReviewBtn");
+  const reviewMsg = document.getElementById("reviewMsg");
+
+  if (!ratingListEl || !emptyStateEl) return;
+
+  const STORAGE_SCANNED = "fp_scanned_sites_v1";
+
+  let selectedUrl = null;
+  let summaryCache = {}; // { url: {avg, count} }
+
+  function readJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function writeJSON(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function normalizeUrl(raw) {
+    if (!raw) return null;
+    let s = raw.trim();
+    if (!s) return null;
+    if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
+    try {
+      const u = new URL(s);
+      return `${u.origin}${u.pathname}`.replace(/\/+$/, "");
+    } catch {
+      return null;
+    }
+  }
+
+  function hostLabel(url) {
+    try {
+      return new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      return url;
+    }
+  }
+
+  function stars(v) {
+    const n = Number(v || 0);
+    if (!n) return "☆☆☆☆☆";
+    const rounded = Math.round(n * 2) / 2;
+    let out = "";
+    for (let i = 1; i <= 5; i++) out += (rounded >= i ? "★" : "☆");
+    return out;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function setMessage(msg, isError = false) {
+    if (!reviewMsg) return;
+    reviewMsg.textContent = msg || "";
+    reviewMsg.style.color = isError ? "#dc2626" : "";
+  }
+
+  function validateReviewForm() {
+    if (!submitReviewBtn) return;
+    const ratingVal = reviewStars ? reviewStars.value : "";
+    const commentVal = reviewText ? reviewText.value.trim() : "";
+    submitReviewBtn.disabled = !(selectedUrl && ratingVal && commentVal.length >= 3);
+  }
+
+  function getScannedSites() {
+    return readJSON(STORAGE_SCANNED, []); // [{url,lastScannedAt}]
+  }
+
+  function setScannedSites(sites) {
+    writeJSON(STORAGE_SCANNED, sites);
+  }
+
+  function upsertScanned(url) {
+    const sites = getScannedSites();
+    const now = Date.now();
+    const idx = sites.findIndex(s => s.url === url);
+    if (idx >= 0) sites[idx].lastScannedAt = now;
+    else sites.push({ url, lastScannedAt: now });
+    setScannedSites(sites);
+  }
+
+  async function fetchSummaries(urls) {
+    // uses /api/url-review-summaries so sidebar is fast
+    const res = await fetch("/api/url-review-summaries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ urls })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to load summaries");
+    return data.summaries || {};
+  }
+
+  function sortSites(sites, mode) {
+    const m = mode || "relevant";
+    const withStats = sites.map(s => {
+      const stats = summaryCache[s.url] || { avg: 0, count: 0 };
+      return { ...s, avg: stats.avg || 0, count: stats.count || 0 };
+    });
+
+    if (m === "highest") {
+      withStats.sort((a, b) => (b.avg - a.avg) || (b.count - a.count) || (b.lastScannedAt - a.lastScannedAt));
+      return withStats;
+    }
+    if (m === "lowest") {
+      withStats.sort((a, b) => (a.avg - b.avg) || (a.count - b.count) || (b.lastScannedAt - a.lastScannedAt));
+      return withStats;
+    }
+    if (m === "newest") {
+      withStats.sort((a, b) => b.lastScannedAt - a.lastScannedAt);
+      return withStats;
+    }
+
+    // relevant: reviewed first, then newest
+    withStats.sort((a, b) => (b.count - a.count) || (b.lastScannedAt - a.lastScannedAt));
+    return withStats;
+  }
+
+  async function loadPreview(url) {
+    if (!previewEl) return;
+    previewEl.style.display = "none";
+    previewEl.innerHTML = "";
+
+    if (!url) return;
+
+    try {
+      const res = await fetch(`/api/url-reviews?url=${encodeURIComponent(url)}&limit=2`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load preview");
+
+      const reviews = data.reviews || [];
+      if (!reviews.length) {
+        previewEl.style.display = "block";
+        previewEl.innerHTML = `<div class="reviewPreviewMeta">No reviews yet. Be the first to write one.</div>`;
+        return;
+      }
+
+      previewEl.style.display = "block";
+      previewEl.innerHTML = reviews.map(r => `
+        <div class="reviewPreviewItem">
+          <div class="reviewPreviewStars">${stars(r.rating)} <span style="color:var(--muted); font-weight:800;">(${r.rating}/5)</span></div>
+          <div class="reviewPreviewText">${escapeHtml(r.comment)}</div>
+          <div class="reviewPreviewMeta">${escapeHtml(r.username || "User")}</div>
+        </div>
+      `).join("");
+    } catch (e) {
+      previewEl.style.display = "block";
+      previewEl.innerHTML = `<div class="reviewPreviewMeta">Unable to load preview.</div>`;
+    }
+  }
+
+  function setSelected(url) {
+    selectedUrl = url;
+    setMessage("");
+
+    if (!selectedSiteLabel) return;
+
+    if (!url) {
+      selectedSiteLabel.textContent = "Select a website from the list to review.";
+      if (submitReviewBtn) submitReviewBtn.disabled = true;
+      if (previewEl) { previewEl.style.display = "none"; previewEl.innerHTML = ""; }
+      return;
+    }
+
+    const stats = summaryCache[url] || { avg: 0, count: 0 };
+    const avgText = stats.count ? stats.avg.toFixed(1) : "--";
+
+    selectedSiteLabel.textContent =
+      `Reviewing: ${hostLabel(url)} • Overall: ${avgText} ${stars(stats.avg)} • ${stats.count} reviews`;
+
+    validateReviewForm();
+    loadPreview(url);
+    renderSidebar(); // highlight selected
+  }
+
+  async function renderSidebar() {
+    const sites = getScannedSites();
+    if (!sites.length) {
+      emptyStateEl.style.display = "block";
+      ratingListEl.innerHTML = "";
+      setSelected(null);
+      return;
+    }
+
+    // refresh summaries from DB
+    try {
+      summaryCache = await fetchSummaries(sites.map(s => s.url));
+    } catch {
+      // if summaries fail, keep old cache (still render)
+    }
+
+    emptyStateEl.style.display = "none";
+
+    const sorted = sortSites(sites, sortSelect ? sortSelect.value : "relevant");
+
+    ratingListEl.innerHTML = sorted.map(s => {
+      const stats = summaryCache[s.url] || { avg: 0, count: 0 };
+      const avgText = stats.count ? stats.avg.toFixed(1) : "--";
+      const cls = selectedUrl === s.url ? "selected" : "";
+
+      return `
+        <div class="sidebarRatingItem ${cls}" data-url="${s.url}">
+          <div class="sidebarRatingThumb" aria-hidden="true"></div>
+
+          <div class="sidebarRatingInfo">
+            <div class="sidebarRatingTitle">${hostLabel(s.url)}</div>
+            <div class="sidebarRatingUrl">${s.url}</div>
+            <div class="sidebarRatingStars" aria-label="stars">${stars(stats.avg)}</div>
+            <div class="sidebarRatingMeta">
+              <span>Rating: ${avgText}</span>
+              <span>•</span>
+              <span>Reviews: ${stats.count}</span>
+            </div>
+          </div>
+
+          <div class="sidebarRatingAction">
+            <button type="button" class="sidebarViewBtn">View</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Events
+  if (sortSelect) sortSelect.addEventListener("change", renderSidebar);
+
+  ratingListEl.addEventListener("click", (e) => {
+    const item = e.target.closest(".sidebarRatingItem");
+    if (!item) return;
+
+    const url = item.dataset.url;
+    if (!url) return;
+
+    const btn = e.target.closest("button");
+    if (btn && btn.classList.contains("sidebarViewBtn")) {
+      // Open internal ratings page (looks like “external” reviews site)
+      window.open(`/ratings?url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    setSelected(url);
+  });
+
+  if (reviewStars) reviewStars.addEventListener("change", validateReviewForm);
+  if (reviewText) reviewText.addEventListener("input", validateReviewForm);
+
+
+  // Register scanned URL when scan form is submitted (only if scan is valid by Ishaal rules)
+  if (form) {
+    form.addEventListener("submit", () => {
+      const userEmail = (document.getElementById("userEmail")?.value || "").trim();
+      const additionalEmail = (document.getElementById("additionalEmail")?.value || "").trim();
+      const userPassword = (document.getElementById("userPassword")?.value || "");
+
+      // match Ishaal validation: if scan won't run, don't store
+      if (!userEmail && !additionalEmail && !userPassword) return;
+
+      const normalized = normalizeUrl(urlInput ? urlInput.value : "");
+      if (!normalized) return;
+
+      upsertScanned(normalized);
+      renderSidebar();
+      setSelected(normalized);
+    });
+  }
+
+  // first render
+  renderSidebar();
+})();
+
+// ==================================================
+// Trung Nguyen — Ratings Page (loads DB reviews for a URL)
+// Page: /ratings?url=...
+// ==================================================
+(function TrungRatingsPage() {
+  const root = document.getElementById("ratingsPageRoot");
+  if (!root) return; // only run on ratings page
+
+  function normalizeUrl(raw) {
+    if (!raw) return null;
+    let s = raw.trim();
+    if (!s) return null;
+    if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
+    try {
+      const u = new URL(s);
+      return `${u.origin}${u.pathname}`.replace(/\/+$/, "");
+    } catch {
+      return null;
+    }
+  }
+
+  function hostLabel(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ""); }
+    catch { return url; }
+  }
+
+  function stars(v) {
+    const n = Number(v || 0);
+    if (!n) return "☆☆☆☆☆";
+    const rounded = Math.round(n * 2) / 2;
+    let out = "";
+    for (let i = 1; i <= 5; i++) out += (rounded >= i ? "★" : "☆");
+    return out;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("url") || "";
+  const url = normalizeUrl(raw);
+
+  const titleEl = document.getElementById("ratingsTitle");
+  const subEl = document.getElementById("ratingsSub");
+  const summaryEl = document.getElementById("ratingsSummaryLine");
+  const listEl = document.getElementById("ratingsList");
+  const emptyEl = document.getElementById("ratingsEmpty");
+  const sortEl = document.getElementById("ratingsSortSelect");
+  const filterRadios = Array.from(document.querySelectorAll('input[name="ratingFilter"]'));
+
+  if (!url) {
+    if (titleEl) titleEl.textContent = "Website Reviews";
+    if (subEl) subEl.textContent = "Invalid or missing URL";
+    if (emptyEl) { emptyEl.style.display = "block"; emptyEl.textContent = "Missing URL. Open this page from the sidebar View button."; }
+    return;
+  }
+
+  if (titleEl) titleEl.textContent = `Reviews for ${hostLabel(url)}`;
+
+  let allReviews = [];
+  let avgRating = 0;
+  let reviewCount = 0;
+
+  function currentFilter() {
+    const chosen = filterRadios.find(r => r.checked);
+    return chosen ? chosen.value : "any";
+  }
+
+  function currentSort() {
+    return sortEl ? sortEl.value : "newest";
+  }
+
+  function render() {
+    let reviews = [...allReviews];
+
+    const f = currentFilter();
+    if (f !== "any") {
+      const wanted = Number(f);
+      reviews = reviews.filter(r => Number(r.rating) === wanted);
+    }
+
+    const s = currentSort();
+    if (s === "highest") {
+      reviews.sort((a, b) => (b.rating - a.rating) || (new Date(b.created_at) - new Date(a.created_at)));
+    } else if (s === "lowest") {
+      reviews.sort((a, b) => (a.rating - b.rating) || (new Date(b.created_at) - new Date(a.created_at)));
+    } else {
+      reviews.sort((a, b) => (new Date(b.created_at) - new Date(a.created_at)));
+    }
+
+    if (!reviews.length) {
+      listEl.innerHTML = "";
+      emptyEl.style.display = "block";
+      return;
+    }
+
+    emptyEl.style.display = "none";
+
+    listEl.innerHTML = reviews.map(r => `
+      <div class="reviewRow">
+        <div class="reviewThumb" aria-hidden="true"></div>
+        <div>
+          <div class="reviewHeaderLine">
+            <div class="reviewUser">${escapeHtml(r.username || "User")}</div>
+            <div class="reviewDate">${formatDate(r.created_at)}</div>
+          </div>
+          <div class="reviewStarsLine">
+            ${stars(r.rating)} <span style="color:var(--muted); font-weight:900;">(${r.rating}/5)</span>
+          </div>
+          <div class="reviewComment">${escapeHtml(r.comment)}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function load() {
+    const res = await fetch(`/api/url-reviews?url=${encodeURIComponent(url)}&limit=200`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to load reviews");
+
+    allReviews = data.reviews || [];
+    avgRating = data.avg_rating || 0;
+    reviewCount = data.review_count || 0;
+
+    subEl.textContent = `${reviewCount} review${reviewCount === 1 ? "" : "s"}`;
+    summaryEl.textContent = reviewCount
+      ? `Overall: ${avgRating.toFixed(1)} ${stars(avgRating)} • ${reviewCount} total`
+      : "No ratings yet.";
+
+    render();
+  }
+
+  filterRadios.forEach(r => r.addEventListener("change", render));
+  if (sortEl) sortEl.addEventListener("change", render);
+
+  load().catch(err => {
+    emptyEl.style.display = "block";
+    emptyEl.textContent = err.message || "Failed to load reviews.";
+  });
+})();
+    
 });
