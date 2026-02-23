@@ -137,10 +137,10 @@ class Review(db.Model):
 # Create tables
 with app.app_context():
     try:
-	db.create_all()
-	print("Database tables created successfully.")
+        db.create_all()
+        print("Database tables created successfully.")
     except: Exception as e:
-	print(f"Database initialization failed: {e}")
+        print(f"Database initialization failed: {e}")
     # Create activity_logs table (used by tracker module)
     from sqlalchemy import text
     with db.engine.connect() as conn:
