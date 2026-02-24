@@ -2,6 +2,7 @@
 // dashboardScripts.js
 document.addEventListener('DOMContentLoaded', () => {
 
+
     // ===== Theme toggle =====
     const toggle = document.getElementById("themeToggle");
     if (toggle) {
@@ -856,40 +857,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (reviewStars) reviewStars.addEventListener("change", validateReviewForm);
   if (reviewText) reviewText.addEventListener("input", validateReviewForm);
-// Khang /Create an submission for review 2/23/2026
-if (submitReviewBtn) {
-    submitReviewBtn.addEventListener("click", async () => {
-      setMessage("");
-
-      if (!selectedUrl) return setMessage("Select a website first.", true);
-
-      const rating = parseInt(reviewStars.value  "0", 10);
-      const comment = (reviewText.value  "").trim();
-
-      if (!rating) return setMessage("Pick a rating.", true);
-      if (comment.length < 3) return setMessage("Write a short comment (min 3 chars).", true);
-
-      try {
-        const res = await fetch("/api/url-reviews", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: selectedUrl, rating, comment })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error  "Failed to submit review");
-
-        reviewStars.value = "";
-        reviewText.value = "";
-        validateReviewForm();
-
-        setMessage("Review submitted!");
-        await renderSidebar();
-        setSelected(selectedUrl); // refresh label + preview
-      } catch (err) {
-        setMessage(err.message  "Failed to submit review.", true);
-      }
-    });
-  } 
 
   if (submitReviewBtn) {
     submitReviewBtn.addEventListener("click", async () => {
@@ -928,9 +895,13 @@ if (submitReviewBtn) {
   // Register scanned URL when scan form is submitted (only if scan is valid by Ishaal rules)
   if (form) {
     form.addEventListener("submit", () => {
-      const userEmail = (document.getElementById("userEmail")?.value || "").trim();
-      const additionalEmail = (document.getElementById("additionalEmail")?.value || "").trim();
-      const userPassword = (document.getElementById("userPassword")?.value || "");
+        const userEmailEl = document.getElementById("userEmail");
+        const additionalEmailEl = document.getElementById("additionalEmail");
+        const userPasswordEl = document.getElementById("userPassword");
+
+        const userEmail = userEmailEl ? userEmailEl.value.trim() : "";
+        const additionalEmail = additionalEmailEl ? additionalEmailEl.value.trim() : "";
+        const userPassword = userPasswordEl ? userPasswordEl.value : "";
 
       // match Ishaal validation: if scan won't run, don't store
       if (!userEmail && !additionalEmail && !userPassword) return;

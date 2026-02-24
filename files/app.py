@@ -1095,30 +1095,7 @@ def check_password_pwned():
         return jsonify({"error": "Request timed out. Please try again."}), 504
     except requests.RequestException:
         return jsonify({"error": "Unable to check password at this time."}), 503
-
-#Terry added
-
-@app.route("/scan", methods=["POST"])
-def scan():
-    domain = request.form["domain"]
-    # Activity logging disabled for now (circular import issues in production)
-    log_activity("run_scan", domain)
-    return redirect(url_for("dashboard"))
-    # scan logic here
-
-@app.teardown_appcontext
-def close_db(exception=None):
-    db_conn = g.pop("db", None)
-
-    if db_conn is not None:
-        db_conn.close()
-
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5001))
-    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug, host="0.0.0.0", port=port)
+    
 
 #Trung Nguyen
 # ===== URL Reviews API (store + fetch + summaries) =====
@@ -1244,3 +1221,29 @@ def api_url_review_summaries():
         }
 
     return jsonify({"summaries": summary_map})
+
+
+#Terry added
+
+@app.route("/scan", methods=["POST"])
+def scan():
+    domain = request.form["domain"]
+    # Activity logging disabled for now (circular import issues in production)
+    log_activity("run_scan", domain)
+    return redirect(url_for("dashboard"))
+    # scan logic here
+
+@app.teardown_appcontext
+def close_db(exception=None):
+    db_conn = g.pop("db", None)
+
+    if db_conn is not None:
+        db_conn.close()
+
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5001))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, host="0.0.0.0", port=port)
+
