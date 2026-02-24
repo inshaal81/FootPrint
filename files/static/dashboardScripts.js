@@ -858,6 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (reviewStars) reviewStars.addEventListener("change", validateReviewForm);
   if (reviewText) reviewText.addEventListener("input", validateReviewForm);
 
+// Khang /Create an submission for review 2/23/2026
   if (submitReviewBtn) {
     submitReviewBtn.addEventListener("click", async () => {
       setMessage("");
