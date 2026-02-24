@@ -132,6 +132,16 @@ class Review(db.Model):
     comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+#Trung Nguyen
+# ===== URL Review model (reviews tied to scanned website URLs) =====
+class UrlReview(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False, index=True)
+    url = db.Column(db.String(350), nullable=False, index=True)   # normalized URL
+    rating = db.Column(db.Integer, nullable=False)               # 1-5
+    comment = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 #Terry modified
 # Create tables
 with app.app_context():
