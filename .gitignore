@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 files/instance/data.db
+
+# Environment files (contain secrets)
+.env
+*.env
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
