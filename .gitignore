@@ -9,10 +9,17 @@ files/instance/
 tds.json
 trackers.json
 
-# Environment files (contain secrets)
+# Environment files (contain secrets) - never commit real values.
+# .env.example is the placeholder-only template and is tracked on purpose.
 .env
 *.env
+.env.*
+!.env.example
 
 # macOS metadata
 .DS_Store
 **/.DS_Store
+
+# Local tooling and personal working notes
+.claude/
+dev/
