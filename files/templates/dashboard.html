@@ -57,17 +57,6 @@
                         <button type="submit" class="checkButton">Check for Breaches</button>
                     </form>
                 </div>
-
-                <!-- Data Removal Protocol Summary (in left column) -->
-                <div id="removalProtocolSummary" class="removalProtocolSummary" style="display: none;">
-                    <h3>Data Removal Protocol</h3>
-                    <p class="subtitle">
-                        These data brokers may also have your information. Use the official opt-out links and track your progress.
-                    </p>
-                    <div id="removalBreachesList"></div>
-                    <h4 style="margin-top: 15px;">Summary</h4>
-                    <div id="removalSummary">No actions yet.</div>
-                </div>
             </div>
 
             <div class="rightColumn">
@@ -88,61 +77,77 @@
                 </div>
             </div>
             
-            <!-- Trung Review section  -->
-            <!-- NEW: RATING SIDEBAR (3rd column) -->
-            <div id="ratingSidebar" class="ratingSidebar">
-                <div class="ratingSidebarHeader">
-                <h3>Ratings</h3>
+        </div>
 
-                <div class="ratingSidebarControls">
-                    <label for="sidebarSort">Sort by</label>
-                    <select id="sidebarSort" name="sidebarSort">
-                    <option value="relevant" selected>Most relevant</option>
-                    <option value="newest">Newest</option>
-                    <option value="highest">Highest</option>
-                    <option value="lowest">Lowest</option>
-                    </select>
-                </div>
-                </div>
+        <!-- Data Removal Protocol + Ratings, side by side -->
+        <div class="removalRatingsDashboard">
+            <div class="removalRatingsGrid">
 
-                <!-- Empty state (shown until scans happen) -->
-                <div id="sidebarEmptyState" class="sidebarEmptyState">
-                <strong>No scanned websites yet.</strong>
-                <p>Enter a Website URL and run a scan to start collecting reviews.</p>
+                <!-- Data Removal Protocol Summary -->
+                <div id="removalProtocolSummary" class="removalProtocolSummary" style="display: none;">
+                    <h3>Data Removal Protocol</h3>
+                    <p class="subtitle">
+                        These data brokers may also have your information. Use the official opt-out links and track your progress.
+                    </p>
+                    <div id="removalBreachesList"></div>
+                    <h4 style="margin-top: 15px;">Summary</h4>
+                    <div id="removalSummary">No actions yet.</div>
                 </div>
 
-                <!-- List (rendered by JS) -->
-                <div id="sidebarRatingList" class="sidebarRatingList"></div>
+                <!-- Trung Review section -->
+                <div id="ratingSidebar" class="ratingSidebar">
+                    <div class="ratingSidebarHeader">
+                    <h3>Ratings</h3>
 
-                <!-- Write review (bottom) -->
-                <div class="writeReviewBox">
-                <h4 class="writeReviewTitle">Write a Review</h4>
-                <p id="selectedSiteLabel" class="selectedSiteLabel">Select a website from the list to review.</p>
-                <div id="selectedReviewsPreview" class="selectedReviewsPreview"></div>
+                    <div class="ratingSidebarControls">
+                        <label for="sidebarSort">Sort by</label>
+                        <select id="sidebarSort" name="sidebarSort">
+                        <option value="relevant" selected>Most relevant</option>
+                        <option value="newest">Newest</option>
+                        <option value="highest">Highest</option>
+                        <option value="lowest">Lowest</option>
+                        </select>
+                    </div>
+                    </div>
 
-                <div class="writeReviewGroup">
-                    <label for="reviewStars">Rating</label>
-                    <select id="reviewStars" name="reviewStars">
-                    <option value="" selected disabled>Select</option>
-                    <option value="5">★★★★★ (5)</option>
-                    <option value="4">★★★★☆ (4)</option>
-                    <option value="3">★★★☆☆ (3)</option>
-                    <option value="2">★★☆☆☆ (2)</option>
-                    <option value="1">★☆☆☆☆ (1)</option>
-                    </select>
+                    <!-- Empty state (shown until scans happen) -->
+                    <div id="sidebarEmptyState" class="sidebarEmptyState">
+                    <strong>No scanned websites yet.</strong>
+                    <p>Enter a Website URL and run a scan to start collecting reviews.</p>
+                    </div>
+
+                    <!-- List (rendered by JS) -->
+                    <div id="sidebarRatingList" class="sidebarRatingList"></div>
+
+                    <!-- Write review (bottom) -->
+                    <div class="writeReviewBox">
+                    <h4 class="writeReviewTitle">Write a Review</h4>
+                    <p id="selectedSiteLabel" class="selectedSiteLabel">Select a website from the list to review.</p>
+                    <div id="selectedReviewsPreview" class="selectedReviewsPreview"></div>
+
+                    <div class="writeReviewGroup">
+                        <label for="reviewStars">Rating</label>
+                        <select id="reviewStars" name="reviewStars">
+                        <option value="" selected disabled>Select</option>
+                        <option value="5">★★★★★ (5)</option>
+                        <option value="4">★★★★☆ (4)</option>
+                        <option value="3">★★★☆☆ (3)</option>
+                        <option value="2">★★☆☆☆ (2)</option>
+                        <option value="1">★☆☆☆☆ (1)</option>
+                        </select>
+                    </div>
+
+                    <div class="writeReviewGroup">
+                        <label for="reviewText">Comment</label>
+                        <textarea id="reviewText" name="reviewText" rows="4" placeholder="Write your review..."></textarea>
+                    </div>
+
+                    <button type="button" id="submitReviewBtn" class="submitReviewBtn" disabled>Submit Review</button>
+                    <div id="reviewMsg" class="reviewMsg" aria-live="polite"></div>
+                    </div>
                 </div>
 
-                <div class="writeReviewGroup">
-                    <label for="reviewText">Comment</label>
-                    <textarea id="reviewText" name="reviewText" rows="4" placeholder="Write your review..."></textarea>
-                </div>
-
-                <button type="button" id="submitReviewBtn" class="submitReviewBtn" disabled>Submit Review</button>
-                <div id="reviewMsg" class="reviewMsg" aria-live="polite"></div>
-                </div>
             </div>
-            <!-- END RATING SIDEBAR -->
-
         </div>
 
         <!-- Breach-Specific Actions (shown first - higher priority) -->

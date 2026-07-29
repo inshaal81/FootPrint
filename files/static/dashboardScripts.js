@@ -255,7 +255,7 @@ function displayResults(emailResults, passwordResult, trackerResult) {
       resultsHTML += `
           <div class="tracker-analysis-card ${riskClass}" style="border-left-color: ${color};">
               <div class="tracker-header">
-                  <h4>Privacy Analysis: ${escapeHtml(trackerResult.url)}</h4>
+                  <h4>🔍 Website Privacy Analysis</h4>
                   <span class="risk-badge" style="background: ${color};">${riskText} (${score}/10)</span>
               </div>
 

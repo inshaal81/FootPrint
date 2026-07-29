@@ -975,10 +975,15 @@ body.dark .breachToggleBtn:hover {
 }
 
 /* ===== Data Removal Protocol Summary (Left Column) ===== */
+/* Standalone card inside .removalRatingsGrid. It used to sit under the input
+   card in the left column, which is why it previously styled itself as a
+   border-top separator rather than a card. */
 .removalProtocolSummary {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .removalProtocolSummary h3 {
@@ -992,6 +997,30 @@ body.dark .breachToggleBtn:hover {
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 20px;
+}
+
+/* ===== Data Removal Protocol + Ratings Dashboard =====
+   Outer shell matches .breachActionsDashboard / .providersDashboard. The grid
+   uses auto-fit so that when the removal protocol card is still hidden
+   (before a scan) the ratings card takes the full width instead of leaving a
+   dead half-column. */
+.removalRatingsDashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 32px;
+  padding: 32px;
+  border: 2px solid var(--orange);
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.removalRatingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  align-items: start;
 }
 
 /* ===== Breach-Specific Actions Dashboard ===== */
@@ -1273,8 +1302,14 @@ body.dark .providersBody .subtitle {
   color: #aaaaaa;
 }
 
+body.dark .removalRatingsDashboard {
+  background: #0a0a0a;
+  border-color: #ffd27f;
+}
+
 body.dark .removalProtocolSummary {
-  border-top-color: #444;
+  background: #121212;
+  border-color: #444;
 }
 
 body.dark .removalProtocolSummary h3 {
@@ -1697,10 +1732,10 @@ body.dark .summaryCompleted {
 
 /* Trung - Review Dashboard */
 /* ============================
-   NEW: 3-column dashboard layout
+   2-column dashboard layout (ratings moved out to .removalRatingsGrid)
    ============================ */
 .dashboardBody {
-  grid-template-columns: 1fr 1fr 360px;
+  grid-template-columns: 1fr 1fr;
   align-items: stretch;
 }
 
@@ -1712,7 +1747,9 @@ body.dark .summaryCompleted {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 24px;
-  min-height: 825px;
+  /* Was min-height: 825px to match the 825px left/right columns back when this
+     was the third grid column. It now sits in .removalRatingsGrid, so it sizes
+     to its content instead of holding open a fixed block of empty space. */
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -2389,7 +2426,21 @@ body.dark .reviewPreviewMeta {
 .tracker-header h4 {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text); /* fallback if no risk class is present */
+}
+
+/* Title colour tracks the card tint, the same way .passwordBreachResult
+   colours its heading against its own background. */
+.tracker-analysis-card.risk-high .tracker-header h4 {
+  color: #991b1b;
+}
+
+.tracker-analysis-card.risk-moderate .tracker-header h4 {
+  color: #92400e;
+}
+
+.tracker-analysis-card.risk-low .tracker-header h4 {
+  color: #166534;
 }
 
 .risk-badge {
@@ -2481,7 +2532,19 @@ body.dark .tracker-analysis-card.risk-low {
 /* body.dark does not redefine the :root custom properties, so anything using
    var(--text) / var(--muted) needs an explicit override here. */
 body.dark .tracker-header h4 {
-  color: #f3f4f6;
+  color: #f3f4f6; /* fallback if no risk class is present */
+}
+
+body.dark .tracker-analysis-card.risk-high .tracker-header h4 {
+  color: #fca5a5;
+}
+
+body.dark .tracker-analysis-card.risk-moderate .tracker-header h4 {
+  color: #fcd34d;
+}
+
+body.dark .tracker-analysis-card.risk-low .tracker-header h4 {
+  color: #86efac;
 }
 
 body.dark .tracker-description {
