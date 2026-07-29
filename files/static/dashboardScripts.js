@@ -1,5 +1,28 @@
 // Ishaal
 // dashboardScripts.js
+
+// ===== HTML escaping =====
+// Everything rendered through innerHTML must pass through this. Quotes are
+// escaped too, so it is safe inside attribute values as well as text nodes.
+function escapeHtml(s) {
+    return String(s === null || s === undefined ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+// Escaping alone does not make a URL safe in an href — "javascript:" survives
+// it untouched. Only allow http/https, and fall back to a dead link otherwise.
+function safeUrl(url) {
+    const raw = String(url === null || url === undefined ? "" : url).trim();
+    if (/^https?:\/\//i.test(raw)) {
+        return escapeHtml(raw);
+    }
+    return "#";
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
 
@@ -188,52 +211,20 @@ function displayResults(emailResults, passwordResult, trackerResult) {
 
   let resultsHTML = "";
 
-  // 1. TERRY: Tracker Radar / Risk Score Section (Static UI)
-  if (trackerResult) {
-      const score = trackerResult.risk_score || 1;
-      // Define colors based on risk level
-      const color = score >= 7 ? "#dc3545" : (score >= 4 ? "#ffc107" : "#28a745");
-      const riskText = score >= 7 ? "High Risk" : (score >= 4 ? "Moderate Risk" : "Low Risk");
-      const reason = trackerResult.risk_reason || "General Tracking"; // Grab the reason from Python
-
-      resultsHTML += `
-          <div class="tracker-analysis-card" ...>
-              <div ...>
-                  <h4 ...>Privacy Analysis: ${trackerResult.url}</h4>
-                  <span ...>${riskText} (${score}/10)</span>
-              </div>
-              
-              <div style="background: #e9ecef; height: 12px; ...">
-                  <div style="width: ${score * 10}%; background: ${color}; height: 100%;"></div>
-              </div>
-      
-              <p style="color: ${color}; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
-                  ⚠️ Detection: ${reason}
-              </p>
-      
-              <p style="font-size: 0.95rem; color: #555; margin: 0; line-height: 1.5;">
-                  ${trackerResult.is_tracker 
-                      ? `This site is a known tracker owned by <b>${trackerResult.owner}</b>.` 
-                      : `✅ <strong>Safe:</strong> Domain not found in tracker database.`}
-              </p>
-          </div>
-      `;
-  }
-
-  // 2. Password Results Section (Ishaal)
+  // 1. Password Results Section (Ishaal)
   if (passwordResult) {
       if (passwordResult.breached) {
           resultsHTML += `
-              <div class="passwordBreachResult breached ${passwordResult.severity}">
+              <div class="passwordBreachResult breached ${escapeHtml(passwordResult.severity)}">
                   <div class="passwordBreachHeader">
                       <span class="passwordBreachIcon">⚠️</span>
                       <h4>Password Compromised</h4>
                   </div>
-                  <p class="passwordBreachMessage">${passwordResult.message}</p>
+                  <p class="passwordBreachMessage">${escapeHtml(passwordResult.message)}</p>
                   <p class="passwordBreachAdvice">We strongly recommend changing this password immediately.</p>
                   <div class="passwordBreachSeverity">
                       <span class="severityLabel">Severity:</span>
-                      <span class="severityBadge ${passwordResult.severity}">${passwordResult.severity.toUpperCase()}</span>
+                      <span class="severityBadge ${escapeHtml(passwordResult.severity)}">${escapeHtml(String(passwordResult.severity).toUpperCase())}</span>
                   </div>
               </div>
           `;
@@ -244,39 +235,94 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                       <span class="passwordBreachIcon">✅</span>
                       <h4>Password Not Found in Breaches</h4>
                   </div>
-                  <p class="passwordBreachMessage">${passwordResult.message}</p>
+                  <p class="passwordBreachMessage">${escapeHtml(passwordResult.message)}</p>
               </div>
           `;
       }
   }
 
+  // 2. TERRY: Tracker Radar / Risk Score Section (Static UI)
+  if (trackerResult) {
+      const score = trackerResult.risk_score || 1;
+      // Define colors based on risk level
+      const color = score >= 7 ? "#dc3545" : (score >= 4 ? "#ffc107" : "#28a745");
+      const riskText = score >= 7 ? "High Risk" : (score >= 4 ? "Moderate Risk" : "Low Risk");
+      // Tints the card background to match the risk level, the same way
+      // .passwordBreachResult differs between breached and safe.
+      const riskClass = score >= 7 ? "risk-high" : (score >= 4 ? "risk-moderate" : "risk-low");
+      const reason = trackerResult.risk_reason || "General Tracking"; // Grab the reason from Python
+
+      resultsHTML += `
+          <div class="tracker-analysis-card ${riskClass}" style="border-left-color: ${color};">
+              <div class="tracker-header">
+                  <h4>Privacy Analysis: ${escapeHtml(trackerResult.url)}</h4>
+                  <span class="risk-badge" style="background: ${color};">${riskText} (${score}/10)</span>
+              </div>
+
+              <div class="risk-meter-container">
+                  <div class="risk-meter-bar" style="width: ${score * 10}%; background: ${color};"></div>
+              </div>
+
+              <p class="tracker-detection" style="color: ${color};">
+                  ⚠️ Detection: ${escapeHtml(reason)}
+              </p>
+
+              <p class="tracker-description">
+                  ${trackerResult.is_tracker
+                      ? `This site is a known tracker owned by <b>${escapeHtml(trackerResult.owner)}</b>.`
+                      : `✅ <strong>Safe:</strong> Domain not found in tracker database.`}
+              </p>
+          </div>
+      `;
+  }
+
   // 3. Email Results Section (Ishaal)
   if (emailResults && emailResults.length > 0) {
-      emailResults.forEach(result => {
+      emailResults.forEach((result, index) => {
           if (result.error) {
               resultsHTML += `
                   <div class="emailBreachNotice">
-                      <h4>Email Check Error for ${result.email}</h4>
-                      <p>${result.error}</p>
+                      <h4>Email Check Error for ${escapeHtml(result.email)}</h4>
+                      <p>${escapeHtml(result.error)}</p>
                   </div>
               `;
           } else if (!result.breached || result.breaches.length === 0) {
               resultsHTML += `
                   <div class="noBreachFound">
                       <h4>Good News!</h4>
-                      <p>No breaches found for <strong>${result.email}</strong></p>
+                      <p>No breaches found for <strong>${escapeHtml(result.email)}</strong></p>
                   </div>
               `;
           } else {
+              // Cap long breach lists behind a "Show more" toggle, matching the
+              // data removal protocol in the left column.
+              const MAX_VISIBLE_BREACHES = 15;
+              const visibleBreaches = result.breaches.slice(0, MAX_VISIBLE_BREACHES);
+              const hiddenBreaches = result.breaches.slice(MAX_VISIBLE_BREACHES);
+
+              let breachTagsHTML = visibleBreaches.map(b => `<span class="breachTag">${escapeHtml(b)}</span>`).join('');
+
+              if (hiddenBreaches.length > 0) {
+                  const hiddenId = `hiddenEmailBreaches${index}`;
+                  breachTagsHTML += `
+                      <div class="hiddenBreaches" id="${hiddenId}">
+                          ${hiddenBreaches.map(b => `<span class="breachTag">${escapeHtml(b)}</span>`).join('')}
+                      </div>
+                      <button class="breachToggleBtn" data-target="${hiddenId}" data-hidden-count="${hiddenBreaches.length}">
+                          Show ${hiddenBreaches.length} more
+                      </button>
+                  `;
+              }
+
               resultsHTML += `
                   <div class="emailBreachSection">
                       <div class="emailBreachHeader breached">
                           <span class="breachIcon">⚠️</span>
-                          <h4>Breaches Found for ${result.email}</h4>
+                          <h4>Breaches Found for ${escapeHtml(result.email)}</h4>
                       </div>
                       <p class="breachSummary">Found in <strong>${result.breaches.length}</strong> data breaches:</p>
                       <div class="breachList">
-                          ${result.breaches.map(b => `<span class="breachTag">${b}</span>`).join('')}
+                          ${breachTagsHTML}
                       </div>
                   </div>
               `;
@@ -301,7 +347,7 @@ function displayResults(emailResults, passwordResult, trackerResult) {
         resultsCard.style.display = "block";
         breachResults.innerHTML = `
             <div class="errorMessage">
-                <strong>Error:</strong> ${message}
+                <strong>Error:</strong> ${escapeHtml(message)}
             </div>
         `;
     }
@@ -392,12 +438,12 @@ function displayResults(emailResults, passwordResult, trackerResult) {
             const visibleRemovalBreaches = breaches.slice(0, MAX_VISIBLE_REMOVAL_BREACHES);
             const hiddenRemovalBreaches = breaches.slice(MAX_VISIBLE_REMOVAL_BREACHES);
 
-            let breachTagsHTML = visibleRemovalBreaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('');
+            let breachTagsHTML = visibleRemovalBreaches.map(b => `<span class="breachTagSmall">${escapeHtml(b)}</span>`).join('');
 
             if (hiddenRemovalBreaches.length > 0) {
                 breachTagsHTML += `
                     <div class="hiddenBreaches" id="hiddenRemovalBreaches">
-                        ${hiddenRemovalBreaches.map(b => `<span class="breachTagSmall">${b}</span>`).join('')}
+                        ${hiddenRemovalBreaches.map(b => `<span class="breachTagSmall">${escapeHtml(b)}</span>`).join('')}
                     </div>
                     <button class="breachToggleBtn removalToggleBtn" data-target="hiddenRemovalBreaches" data-hidden-count="${hiddenRemovalBreaches.length}">
                         Show ${hiddenRemovalBreaches.length} more
@@ -448,18 +494,18 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                             <div class="breachActionHeader">
                                 <div class="breachActionInfo">
                                     <span class="breachActionType">${actionTypeLabel}</span>
-                                    <h4 class="breachActionName">${action.company}</h4>
-                                    <span class="breachActionPriority priority-badge-${action.priority}">${action.priority.toUpperCase()} PRIORITY</span>
+                                    <h4 class="breachActionName">${escapeHtml(action.company)}</h4>
+                                    <span class="breachActionPriority priority-badge-${escapeHtml(action.priority)}">${escapeHtml(String(action.priority).toUpperCase())} PRIORITY</span>
                                 </div>
                             </div>
                             <div class="breachActionBody">
-                                <a href="${action.url}" target="_blank" rel="noopener noreferrer" class="breachActionLink">
+                                <a href="${safeUrl(action.url)}" target="_blank" rel="noopener noreferrer" class="breachActionLink">
                                     Go to Security Settings
                                 </a>
                                 <div class="breachActionSteps">
                                     <strong>Recommended Steps:</strong>
                                     <ol>
-                                        ${action.steps.map(step => `<li>${step}</li>`).join('')}
+                                        ${action.steps.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
                                     </ol>
                                 </div>
                             </div>
@@ -478,25 +524,25 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                 const steps = p.steps || [];
 
                 return `
-                    <div class="providerCard" data-provider-id="${p.id}">
+                    <div class="providerCard" data-provider-id="${escapeHtml(p.id)}">
                         <div class="providerHeader">
                             <div class="providerInfo">
-                                <h4 class="providerName">${p.name}</h4>
-                                ${p.eta ? `<span class="providerEta">ETA: ${p.eta}</span>` : ''}
+                                <h4 class="providerName">${escapeHtml(p.name)}</h4>
+                                ${p.eta ? `<span class="providerEta">ETA: ${escapeHtml(p.eta)}</span>` : ''}
                             </div>
-                            <div class="statusBadge status-${currentStatus.toLowerCase().replace(' ', '-')}" data-provider-id="${p.id}" data-status="${currentStatus}">
-                                ${currentStatus.toUpperCase()}
+                            <div class="statusBadge status-${escapeHtml(currentStatus.toLowerCase().replace(' ', '-'))}" data-provider-id="${escapeHtml(p.id)}" data-status="${escapeHtml(currentStatus)}">
+                                ${escapeHtml(currentStatus.toUpperCase())}
                             </div>
                         </div>
                         <div class="providerBody">
-                            <a href="${p.optOutUrl}" target="_blank" rel="noopener noreferrer" class="optOutLink">
+                            <a href="${safeUrl(p.optOutUrl)}" target="_blank" rel="noopener noreferrer" class="optOutLink">
                                 Open Opt-Out Page
                             </a>
                             ${steps.length > 0 ? `
                                 <div class="providerSteps">
                                     <strong>Steps:</strong>
                                     <ol>
-                                        ${steps.map(step => `<li>${step}</li>`).join('')}
+                                        ${steps.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
                                     </ol>
                                 </div>
                             ` : ''}
@@ -649,13 +695,6 @@ function displayResults(emailResults, passwordResult, trackerResult) {
     return out;
   }
 
-  function escapeHtml(s) {
-    return String(s || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
-
   function setMessage(msg, isError = false) {
     if (!reviewMsg) return;
     reviewMsg.textContent = msg || "";
@@ -806,12 +845,12 @@ function displayResults(emailResults, passwordResult, trackerResult) {
       const cls = selectedUrl === s.url ? "selected" : "";
 
       return `
-        <div class="sidebarRatingItem ${cls}" data-url="${s.url}">
+        <div class="sidebarRatingItem ${cls}" data-url="${escapeHtml(s.url)}">
           <div class="sidebarRatingThumb" aria-hidden="true"></div>
 
           <div class="sidebarRatingInfo">
-            <div class="sidebarRatingTitle">${hostLabel(s.url)}</div>
-            <div class="sidebarRatingUrl">${s.url}</div>
+            <div class="sidebarRatingTitle">${escapeHtml(hostLabel(s.url))}</div>
+            <div class="sidebarRatingUrl">${escapeHtml(s.url)}</div>
             <div class="sidebarRatingStars" aria-label="stars">${stars(stats.avg)}</div>
             <div class="sidebarRatingMeta">
               <span>Rating: ${avgText}</span>
@@ -946,13 +985,6 @@ function displayResults(emailResults, passwordResult, trackerResult) {
     let out = "";
     for (let i = 1; i <= 5; i++) out += (rounded >= i ? "★" : "☆");
     return out;
-  }
-
-  function escapeHtml(s) {
-    return String(s || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
   }
 
   function formatDate(iso) {
