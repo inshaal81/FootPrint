@@ -182,23 +182,68 @@ if (form) {
         return data;
     }
 
-// Helper to make the "Show More" buttons work for long breach lists
-function attachToggleListeners() {
-  document.querySelectorAll('.breachToggleBtn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-          const targetId = e.target.dataset.target;
-          const hiddenCount = e.target.dataset.hiddenCount;
-          const container = document.getElementById(targetId);
+// Helper to make the "Show More" buttons work for long lists.
+// Pass a root element to wire only the buttons inside it. Buttons are tagged
+// once bound, so calling this repeatedly (each section renders at a different
+// time) never attaches a second listener — which would toggle twice per click
+// and appear to do nothing.
+function attachToggleListeners(root) {
+  (root || document).querySelectorAll('.breachToggleBtn').forEach(btn => {
+      if (btn.dataset.toggleBound === 'true') return;
+      btn.dataset.toggleBound = 'true';
 
-          if (container && container.classList.contains('expanded')) {
-              container.classList.remove('expanded');
-              e.target.textContent = `Show ${hiddenCount} more`;
-          } else if (container) {
-              container.classList.add('expanded');
-              e.target.textContent = 'Show less';
-          }
+      btn.addEventListener('click', (e) => {
+          const targetId = e.currentTarget.dataset.target;
+          const hiddenCount = e.currentTarget.dataset.hiddenCount;
+          const container = document.getElementById(targetId);
+          if (!container) return;
+
+          const expanding = !container.classList.contains('expanded');
+          container.classList.toggle('expanded', expanding);
+
+          // Toggle the class on each collapsible item rather than relying on a
+          // parent rule, so every item falls back to its own natural display
+          // (inline-block for tags, block for cards) without the CSS having to
+          // know which is which.
+          container.querySelectorAll('[data-collapsible]').forEach(el => {
+              el.classList.toggle('collapsedItem', !expanding);
+          });
+
+          e.currentTarget.textContent = expanding ? 'Show less' : `Show ${hiddenCount} more`;
       });
   });
+}
+
+// Caps a list of rendered item strings at maxVisible and appends a toggle.
+// Works for both the tag lists and the card grids.
+//
+// Items past the cap are marked individually rather than wrapped in a
+// container. A wrapper breaks both layouts:
+//   - in the card grids it becomes a single grid item, stacking the hidden
+//     cards in one column instead of flowing them across the columns;
+//   - in the tag lists it takes a full-width flex line, so the hidden tags
+//     start a new row instead of continuing the row already in progress.
+//
+// Assumes each item string begins with an element carrying a class attribute,
+// which holds for every template below.
+function withShowMore(itemHtmlList, containerId, maxVisible) {
+  const hiddenCount = Math.max(0, itemHtmlList.length - maxVisible);
+
+  let html = itemHtmlList
+      .map((item, i) => i < maxVisible
+          ? item
+          : item.replace('class="', 'data-collapsible="1" class="collapsedItem '))
+      .join('');
+
+  if (hiddenCount > 0) {
+      html += `
+          <button class="breachToggleBtn" data-target="${containerId}" data-hidden-count="${hiddenCount}">
+              Show ${hiddenCount} more
+          </button>
+      `;
+  }
+
+  return html;
 }
 
 // ===== Display Results (Combined Ishaal & Terry) =====
@@ -297,22 +342,12 @@ function displayResults(emailResults, passwordResult, trackerResult) {
               // Cap long breach lists behind a "Show more" toggle, matching the
               // data removal protocol in the left column.
               const MAX_VISIBLE_BREACHES = 15;
-              const visibleBreaches = result.breaches.slice(0, MAX_VISIBLE_BREACHES);
-              const hiddenBreaches = result.breaches.slice(MAX_VISIBLE_BREACHES);
-
-              let breachTagsHTML = visibleBreaches.map(b => `<span class="breachTag">${escapeHtml(b)}</span>`).join('');
-
-              if (hiddenBreaches.length > 0) {
-                  const hiddenId = `hiddenEmailBreaches${index}`;
-                  breachTagsHTML += `
-                      <div class="hiddenBreaches" id="${hiddenId}">
-                          ${hiddenBreaches.map(b => `<span class="breachTag">${escapeHtml(b)}</span>`).join('')}
-                      </div>
-                      <button class="breachToggleBtn" data-target="${hiddenId}" data-hidden-count="${hiddenBreaches.length}">
-                          Show ${hiddenBreaches.length} more
-                      </button>
-                  `;
-              }
+              const listId = `breachList${index}`;
+              const breachTagsHTML = withShowMore(
+                  result.breaches.map(b => `<span class="breachTag">${escapeHtml(b)}</span>`),
+                  listId,
+                  MAX_VISIBLE_BREACHES
+              );
 
               resultsHTML += `
                   <div class="emailBreachSection">
@@ -321,7 +356,7 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                           <h4>Breaches Found for ${escapeHtml(result.email)}</h4>
                       </div>
                       <p class="breachSummary">Found in <strong>${result.breaches.length}</strong> data breaches:</p>
-                      <div class="breachList">
+                      <div class="breachList" id="${listId}">
                           ${breachTagsHTML}
                       </div>
                   </div>
@@ -433,51 +468,27 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                 });
             }
 
-            // Display breach names in the LEFT column (with toggle for long lists)
+            // Display breach names in the removal protocol card (with toggle for
+            // long lists)
             const MAX_VISIBLE_REMOVAL_BREACHES = 15;
-            const visibleRemovalBreaches = breaches.slice(0, MAX_VISIBLE_REMOVAL_BREACHES);
-            const hiddenRemovalBreaches = breaches.slice(MAX_VISIBLE_REMOVAL_BREACHES);
-
-            let breachTagsHTML = visibleRemovalBreaches.map(b => `<span class="breachTagSmall">${escapeHtml(b)}</span>`).join('');
-
-            if (hiddenRemovalBreaches.length > 0) {
-                breachTagsHTML += `
-                    <div class="hiddenBreaches" id="hiddenRemovalBreaches">
-                        ${hiddenRemovalBreaches.map(b => `<span class="breachTagSmall">${escapeHtml(b)}</span>`).join('')}
-                    </div>
-                    <button class="breachToggleBtn removalToggleBtn" data-target="hiddenRemovalBreaches" data-hidden-count="${hiddenRemovalBreaches.length}">
-                        Show ${hiddenRemovalBreaches.length} more
-                    </button>
-                `;
-            }
+            const breachTagsHTML = withShowMore(
+                breaches.map(b => `<span class="breachTagSmall">${escapeHtml(b)}</span>`),
+                'removalBreachTagList',
+                MAX_VISIBLE_REMOVAL_BREACHES
+            );
 
             if (breachesListEl) {
                 breachesListEl.innerHTML = `
                     <div class="breachesFound">
                         <h4>Your Data Found In:</h4>
-                        <div class="breachTagList">
+                        <div class="breachTagList" id="removalBreachTagList">
                             ${breachTagsHTML}
                         </div>
                     </div>
                 `;
 
                 // Add toggle listener for breach expand/collapse
-                const removalToggleBtn = breachesListEl.querySelector('.removalToggleBtn');
-                if (removalToggleBtn) {
-                    removalToggleBtn.addEventListener('click', (e) => {
-                        const targetId = e.target.dataset.target;
-                        const hiddenCount = e.target.dataset.hiddenCount;
-                        const container = document.getElementById(targetId);
-
-                        if (container.classList.contains('expanded')) {
-                            container.classList.remove('expanded');
-                            e.target.textContent = `Show ${hiddenCount} more`;
-                        } else {
-                            container.classList.add('expanded');
-                            e.target.textContent = 'Show less';
-                        }
-                    });
-                }
+                attachToggleListeners(breachesListEl);
             }
 
             // Render breach-specific actions (high priority - shown first)
@@ -511,9 +522,15 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                             </div>
                         </div>
                     `;
-                }).join('');
+                });
 
-                breachActionsEl.innerHTML = breachActionsHTML;
+                const MAX_VISIBLE_BREACH_ACTIONS = 4;
+                breachActionsEl.innerHTML = withShowMore(
+                    breachActionsHTML,
+                    'breachSpecificActions',
+                    MAX_VISIBLE_BREACH_ACTIONS
+                );
+                attachToggleListeners(breachActionsEl);
             } else if (breachActionsEl) {
                 breachActionsEl.innerHTML = '<p class="noBreachActions">No specific remediation actions found for these breaches. Follow the data broker removal steps below.</p>';
             }
@@ -549,10 +566,16 @@ function displayResults(emailResults, passwordResult, trackerResult) {
                         </div>
                     </div>
                 `;
-            }).join('');
+            });
 
             if (providersEl) {
-                providersEl.innerHTML = providersHTML;
+                const MAX_VISIBLE_PROVIDERS = 4;
+                providersEl.innerHTML = withShowMore(
+                    providersHTML,
+                    'removalProviders',
+                    MAX_VISIBLE_PROVIDERS
+                );
+                attachToggleListeners(providersEl);
 
                 // Add click listeners to status badges to cycle through statuses
                 providersEl.querySelectorAll('.statusBadge').forEach(badge => {

@@ -178,7 +178,13 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  justify-content: space-between;
+  /* Fields keep their natural spacing at the top and the submit button is
+     pushed to the bottom edge (see .checkButton margin-top: auto), so the form
+     spans the full card height without dead space at the bottom.
+     Deliberately NOT space-between: the left column stretches to match the
+     right one, which can be several thousand pixels tall once a long breach
+     list is expanded, and space-between would fling the four fields apart. */
+  justify-content: flex-start;
 }
 
 .statsCard,
@@ -249,7 +255,9 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 8px;
+  /* auto pushes the button to the bottom of the form so the card has no dead
+     space beneath it, at any card height */
+  margin-top: auto;
 }
 
 .checkButton:hover {
@@ -922,23 +930,21 @@ body.dark .breachAdvice {
 }
 
 /* Breach List Toggle */
-.hiddenBreaches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  flex-basis: 100%;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height 0.4s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
-  margin-top: 0;
+/* Items past the visible cap, in both the tag lists and the card grids.
+   Hidden per-item rather than inside a wrapper: a wrapper becomes a single grid
+   item in the card grids, and takes a full-width flex line in the tag lists so
+   the hidden tags would start a new row instead of continuing the current one.
+   The class is toggled off the items themselves by attachToggleListeners, so
+   each one returns to its own natural display. */
+.collapsedItem {
+  display: none;
 }
 
-.hiddenBreaches.expanded {
-  max-height: 2000px;
-  opacity: 1;
-  margin-top: 8px;
-  transition: max-height 0.5s ease-in, opacity 0.3s ease-in, margin 0.3s ease-in;
+/* The toggle is itself a grid item, so it has to be told to span the full row
+   or it renders one column wide. */
+#breachSpecificActions > .breachToggleBtn,
+#removalProviders > .breachToggleBtn {
+  grid-column: 1 / -1;
 }
 
 .breachToggleBtn {
@@ -1006,7 +1012,7 @@ body.dark .breachToggleBtn:hover {
    dead half-column. */
 .removalRatingsDashboard {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin-top: 32px;
   padding: 32px;
   border: 2px solid var(--orange);
@@ -1020,13 +1026,15 @@ body.dark .breachToggleBtn:hover {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 32px;
-  align-items: start;
+  /* stretch so the removal protocol and ratings cards always match height and
+     grow together when either side's list is expanded */
+  align-items: stretch;
 }
 
 /* ===== Breach-Specific Actions Dashboard ===== */
 .breachActionsDashboard {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin-top: 32px;
   padding: 32px;
   border: 2px solid #dc2626;
@@ -1254,7 +1262,7 @@ body.dark .priority-badge-low {
 /* ===== Providers Dashboard (Separate Section) ===== */
 .providersDashboard {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin-top: 32px;
   padding: 32px;
   border: 2px solid var(--orange);
@@ -2348,16 +2356,19 @@ body.dark .reviewPreviewMeta {
    4) Make orange dashboard box wider
    ============================ */
 
-/* (4) Expand orange box (dashboard border container) */
+/* (4) Expand orange box (dashboard border container).
+   All four dashboard sections share this width — see $SECTION_WIDTH note on
+   .dashboardBody, .removalRatingsDashboard, .breachActionsDashboard and
+   .providersDashboard. */
 .dashboardBody {
   max-width: 1600px; /* was 1400px */
-  align-items: start; /* prevents grid items stretching weirdly */
+  /* align-items intentionally left at the stretch set above, so the left and
+     right columns always match height and grow together when a result list
+     inside the right column is expanded. */
 }
 
-/* (2) Stop left column form from spreading too much */
-.inputCard form {
-  justify-content: flex-start; /* override space-between */
-}
+/* (2) The form now fills the card height (justify-content: space-between from
+   the base rule) so the left column does not end in dead space. */
 
 /* (1) Ratings list: show about 7 cards then scroll for the rest */
 .sidebarRatingList {
