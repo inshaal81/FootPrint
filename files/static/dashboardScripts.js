@@ -182,6 +182,59 @@ if (form) {
         return data;
     }
 
+// Collapsing items with display:none cannot be transitioned, so the smooth
+// open/close is done by animating the container's own height between its
+// measured collapsed and expanded sizes, then handing it back to auto.
+//
+// This is why the items are not wrapped in an animatable box: a wrapper broke
+// the layout in both containers (a single grid item in the card grids, a
+// full-width flex line in the tag lists). Animating the container instead keeps
+// the items as direct children where they belong.
+function animateCollapsible(container, applyChange) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      applyChange();
+      return;
+  }
+
+  const startHeight = container.getBoundingClientRect().height;
+  applyChange();
+
+  // Force a synchronous layout before measuring. Without this the post-change
+  // size can still read as the old one, which made the animation silently skip
+  // itself for the email breach list while the other toggles animated fine.
+  void container.offsetHeight;
+  const endHeight = Math.max(
+      container.getBoundingClientRect().height,
+      container.scrollHeight
+  );
+
+  if (Math.abs(endHeight - startHeight) < 1) return;
+
+  container.style.overflow = 'hidden';
+  container.style.height = `${startHeight}px`;
+  void container.offsetHeight; // force a reflow so the start height takes effect
+  container.style.transition = 'height 0.35s ease';
+  container.style.height = `${endHeight}px`;
+
+  let finished = false;
+  const cleanup = () => {
+      if (finished) return;
+      finished = true;
+      // Back to auto so the container keeps reflowing normally afterwards,
+      // e.g. on window resize.
+      container.style.transition = '';
+      container.style.height = '';
+      container.style.overflow = '';
+      container.removeEventListener('transitionend', onEnd);
+  };
+  const onEnd = (ev) => {
+      if (ev.target === container && ev.propertyName === 'height') cleanup();
+  };
+
+  container.addEventListener('transitionend', onEnd);
+  setTimeout(cleanup, 600); // fallback in case transitionend never fires
+}
+
 // Helper to make the "Show More" buttons work for long lists.
 // Pass a root element to wire only the buttons inside it. Buttons are tagged
 // once bound, so calling this repeatedly (each section renders at a different
@@ -199,14 +252,17 @@ function attachToggleListeners(root) {
           if (!container) return;
 
           const expanding = !container.classList.contains('expanded');
-          container.classList.toggle('expanded', expanding);
 
-          // Toggle the class on each collapsible item rather than relying on a
-          // parent rule, so every item falls back to its own natural display
-          // (inline-block for tags, block for cards) without the CSS having to
-          // know which is which.
-          container.querySelectorAll('[data-collapsible]').forEach(el => {
-              el.classList.toggle('collapsedItem', !expanding);
+          animateCollapsible(container, () => {
+              container.classList.toggle('expanded', expanding);
+
+              // Toggle the class on each collapsible item rather than relying on
+              // a parent rule, so every item falls back to its own natural
+              // display (inline-block for tags, block for cards) without the CSS
+              // having to know which is which.
+              container.querySelectorAll('[data-collapsible]').forEach(el => {
+                  el.classList.toggle('collapsedItem', !expanding);
+              });
           });
 
           e.currentTarget.textContent = expanding ? 'Show less' : `Show ${hiddenCount} more`;

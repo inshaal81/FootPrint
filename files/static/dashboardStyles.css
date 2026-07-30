@@ -936,8 +936,40 @@ body.dark .breachAdvice {
    the hidden tags would start a new row instead of continuing the current one.
    The class is toggled off the items themselves by attachToggleListeners, so
    each one returns to its own natural display. */
+/* !important because this is a state class that has to beat whatever display
+   the item sets for itself, regardless of source order. Without it the rule is
+   a specificity tie with e.g. .breachTagSmall (display: inline-block), which is
+   defined later in this file and therefore won — the removal protocol tags
+   stayed visible while .breachTag, defined earlier, collapsed correctly. */
 .collapsedItem {
-  display: none;
+  display: none !important;
+}
+
+/* Fade each revealed item in. The container height animation alone is not
+   enough: when the hidden items only fill out rows that already exist (short
+   tag lists, or a grid row that was not full) the container height does not
+   change at all, and the items would otherwise pop in instantly. A keyframe
+   animation is used rather than a transition because an element coming back
+   from display:none has no previous state to transition from. */
+.expanded > [data-collapsible] {
+  animation: collapsibleFadeIn 0.3s ease both;
+}
+
+@keyframes collapsibleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expanded > [data-collapsible] {
+    animation: none;
+  }
 }
 
 /* The toggle is itself a grid item, so it has to be told to span the full row
