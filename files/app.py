@@ -64,8 +64,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- TERRY: 
+# --- TERRY:
 # --- TRACKER CONFIGURATION ---
+# Refreshes trackers.json from the DuckDuckGo Tracker Radar. Called exactly
+# once per process: it downloads the full entity map and rewrites a ~3 MB file,
+# and it used to run three times on every boot (and once per gunicorn worker),
+# adding pure latency inside Render's port-bind window.
 update_trackers()
 
 def get_tracker_list():
@@ -98,10 +102,6 @@ def check_domain_safety(url):
         return True, owner, match # 'match' now contains 'owner', 'score', AND 'risk_reason'
         
     return False, "Clean", {}
-
-# Run update on startup
-with app.app_context():
-    update_trackers()
 
 # ===== User model =====
 class User(db.Model):
@@ -198,7 +198,6 @@ class UrlReview(db.Model):
 with app.app_context():
     try:
         db.create_all()
-        update_trackers()
         print("Database tables created successfully.")
     except Exception as e:
         print(f"Database initialization failed: {e}")

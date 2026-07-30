@@ -41,7 +41,13 @@ def update_trackers(): #function that updates the trackers
                 }
 
         #opens the file tracker.json and dumps the new dictionary there)
-        with open('trackers.json', 'w') as f:
+        # Absolute path, next to this module. app.py reads it via app.root_path,
+        # so a relative path only matched by luck: it depended on the process
+        # being started from inside files/ (as `cd files && gunicorn app:app`
+        # does). From any other working directory the refresh landed somewhere
+        # nothing reads.
+        output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trackers.json')
+        with open(output_path, 'w') as f:
             json.dump({"trackers": formatted_trackers}, f, indent=2)
         #status message confirming how many domains    
         print(f"✅ Success! Loaded {len(formatted_trackers)} tracker domains into trackers.json")
