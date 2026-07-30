@@ -202,226 +202,234 @@ with app.app_context():
         print("Database tables created successfully.")
     except Exception as e:
         print(f"Database initialization failed: {e}")
-    # Create activity_logs table (used by tracker module)
-    from sqlalchemy import text
-    with db.engine.connect() as conn:
-        if DATABASE_URL:
-            # PostgreSQL syntax
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS activity_logs (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER,
-                    action TEXT,
-                    target TEXT,
-                    status TEXT,
-                    ip_address TEXT,
-                    user_agent TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+    # Guarded for the same reason as db.create_all() above. Both the
+    # activity_logs DDL and the RemovalProvider seeding below run a query, so
+    # an unreachable database raised here at import time and gunicorn never
+    # got a WSGI callable — the service crash-looped instead of degrading.
+    try:
+        # Create activity_logs table (used by tracker module)
+        from sqlalchemy import text
+        with db.engine.connect() as conn:
+            if DATABASE_URL:
+                # PostgreSQL syntax
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS activity_logs (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER,
+                        action TEXT,
+                        target TEXT,
+                        status TEXT,
+                        ip_address TEXT,
+                        user_agent TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """))
+            else:
+                # SQLite syntax
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS activity_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER,
+                        action TEXT,
+                        target TEXT,
+                        status TEXT,
+                        ip_address TEXT,
+                        user_agent TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )
+                """))
+            conn.commit()
+        if RemovalProvider.query.count() == 0:
+            providers = [
+                # Tier 1: High Priority People-Search Sites
+                RemovalProvider(
+                    id="whitepages",
+                    name="Whitepages",
+                    opt_out_url="https://www.whitepages.com/suppression-requests",
+                    eta="1-7 days",
+                    steps_json=json.dumps([
+                        "Search for your listing on the suppression page",
+                        "Select your record from the results",
+                        "Verify via phone number to confirm removal"
+                    ])
+                ),
+                RemovalProvider(
+                    id="spokeo",
+                    name="Spokeo",
+                    opt_out_url="https://www.spokeo.com/optout",
+                    eta="3-10 days",
+                    steps_json=json.dumps([
+                        "Search for your profile on Spokeo.com",
+                        "Copy your profile URL",
+                        "Paste URL in opt-out form and enter email",
+                        "Click confirmation link in email"
+                    ])
+                ),
+                RemovalProvider(
+                    id="beenverified",
+                    name="BeenVerified",
+                    opt_out_url="https://www.beenverified.com/f/optout/search",
+                    eta="24-48 hours",
+                    steps_json=json.dumps([
+                        "Search for your name and state",
+                        "Find your listing and click the arrow",
+                        "Enter your email and complete CAPTCHA",
+                        "Verify via email confirmation link"
+                    ])
+                ),
+                RemovalProvider(
+                    id="intelius",
+                    name="Intelius",
+                    opt_out_url="https://www.intelius.com/opt-out",
+                    eta="72 hours",
+                    steps_json=json.dumps([
+                        "Search for your profile on Intelius.com",
+                        "Copy your profile URL",
+                        "Paste URL in the opt-out form",
+                        "Verify your request via email"
+                    ])
+                ),
+                RemovalProvider(
+                    id="radaris",
+                    name="Radaris",
+                    opt_out_url="https://radaris.com/control/privacy",
+                    eta="24-48 hours",
+                    steps_json=json.dumps([
+                        "Search for your listing on Radaris.com",
+                        "Click 'Full Profile' to open your record",
+                        "Copy the profile URL",
+                        "Submit URL in the privacy control form",
+                        "Verify via email"
+                    ])
+                ),
+                RemovalProvider(
+                    id="peoplefinders",
+                    name="PeopleFinders",
+                    opt_out_url="https://www.peoplefinders.com/opt-out",
+                    eta="5-7 days",
+                    steps_json=json.dumps([
+                        "Search for your profile on PeopleFinders.com",
+                        "Copy your profile URL",
+                        "Paste URL in the opt-out form",
+                        "Enter email and solve CAPTCHA",
+                        "Confirm via email"
+                    ])
+                ),
+                RemovalProvider(
+                    id="mylife",
+                    name="MyLife",
+                    opt_out_url="https://www.mylife.com/ccpa/index.pubview",
+                    eta="7-14 days",
+                    steps_json=json.dumps([
+                        "Go to MyLife CCPA opt-out page",
+                        "Submit your name and profile URL",
+                        "Or email privacy@mylife.com with your details",
+                        "Wait for confirmation"
+                    ])
+                ),
+                RemovalProvider(
+                    id="fastpeoplesearch",
+                    name="FastPeopleSearch",
+                    opt_out_url="https://www.fastpeoplesearch.com/removal",
+                    eta="72 hours",
+                    steps_json=json.dumps([
+                        "Search your name on FastPeopleSearch.com",
+                        "Find your listing and click View Free Details",
+                        "Scroll down and click 'Remove My Record'",
+                        "Complete the CAPTCHA and confirm"
+                    ])
+                ),
+                RemovalProvider(
+                    id="nuwber",
+                    name="Nuwber",
+                    opt_out_url="https://nuwber.com/removal/link",
+                    eta="3-5 days",
+                    steps_json=json.dumps([
+                        "Search for your profile on Nuwber.com",
+                        "Copy your profile URL",
+                        "Submit the URL in the removal form",
+                        "Confirm via email"
+                    ])
+                ),
+                # Tier 2: Parent Companies (cover multiple sites)
+                RemovalProvider(
+                    id="peopleconnect",
+                    name="PeopleConnect (TruthFinder/InstantCheckmate)",
+                    opt_out_url="https://suppression.peopleconnect.us/login",
+                    eta="48-72 hours",
+                    steps_json=json.dumps([
+                        "Go to PeopleConnect suppression center",
+                        "Create an account or log in",
+                        "Submit your suppression request",
+                        "This covers TruthFinder, InstantCheckmate, USSearch, and Intelius"
+                    ])
+                ),
+                RemovalProvider(
+                    id="acxiom",
+                    name="Acxiom (Major Data Aggregator)",
+                    opt_out_url="https://isapps.acxiom.com/optout/optout.aspx",
+                    eta="7-30 days",
+                    steps_json=json.dumps([
+                        "Fill in your personal information",
+                        "Submit the opt-out form",
+                        "Acxiom supplies data to thousands of sites",
+                        "Opting out here has wide-reaching effects"
+                    ])
+                ),
+                RemovalProvider(
+                    id="lexisnexis",
+                    name="LexisNexis",
+                    opt_out_url="https://consumer.risk.lexisnexis.com/request",
+                    eta="7-14 days",
+                    steps_json=json.dumps([
+                        "Request your personal data file first",
+                        "Review what data they have on you",
+                        "Submit opt-out request",
+                        "Follow up if needed"
+                    ])
+                ),
+                # Tier 3: Additional Brokers
+                RemovalProvider(
+                    id="thatsthem",
+                    name="That's Them",
+                    opt_out_url="https://thatsthem.com/optout",
+                    eta="24-48 hours",
+                    steps_json=json.dumps([
+                        "Search for your record on ThatsThem.com",
+                        "Copy the record URL",
+                        "Submit opt-out request with the URL",
+                        "Confirm via email"
+                    ])
+                ),
+                RemovalProvider(
+                    id="familytreenow",
+                    name="FamilyTreeNow",
+                    opt_out_url="https://www.familytreenow.com/optout",
+                    eta="24-48 hours",
+                    steps_json=json.dumps([
+                        "Search for your name on FamilyTreeNow.com",
+                        "Find your record",
+                        "Click opt-out and confirm your identity"
+                    ])
+                ),
+                RemovalProvider(
+                    id="usphonebook",
+                    name="USPhoneBook",
+                    opt_out_url="https://www.usphonebook.com/opt-out",
+                    eta="24-48 hours",
+                    steps_json=json.dumps([
+                        "Search for your listing",
+                        "Find your record and click it",
+                        "Click the opt-out link",
+                        "Confirm removal"
+                    ])
                 )
-            """))
-        else:
-            # SQLite syntax
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS activity_logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER,
-                    action TEXT,
-                    target TEXT,
-                    status TEXT,
-                    ip_address TEXT,
-                    user_agent TEXT,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                )
-            """))
-        conn.commit()
-    if RemovalProvider.query.count() == 0:
-        providers = [
-            # Tier 1: High Priority People-Search Sites
-            RemovalProvider(
-                id="whitepages",
-                name="Whitepages",
-                opt_out_url="https://www.whitepages.com/suppression-requests",
-                eta="1-7 days",
-                steps_json=json.dumps([
-                    "Search for your listing on the suppression page",
-                    "Select your record from the results",
-                    "Verify via phone number to confirm removal"
-                ])
-            ),
-            RemovalProvider(
-                id="spokeo",
-                name="Spokeo",
-                opt_out_url="https://www.spokeo.com/optout",
-                eta="3-10 days",
-                steps_json=json.dumps([
-                    "Search for your profile on Spokeo.com",
-                    "Copy your profile URL",
-                    "Paste URL in opt-out form and enter email",
-                    "Click confirmation link in email"
-                ])
-            ),
-            RemovalProvider(
-                id="beenverified",
-                name="BeenVerified",
-                opt_out_url="https://www.beenverified.com/f/optout/search",
-                eta="24-48 hours",
-                steps_json=json.dumps([
-                    "Search for your name and state",
-                    "Find your listing and click the arrow",
-                    "Enter your email and complete CAPTCHA",
-                    "Verify via email confirmation link"
-                ])
-            ),
-            RemovalProvider(
-                id="intelius",
-                name="Intelius",
-                opt_out_url="https://www.intelius.com/opt-out",
-                eta="72 hours",
-                steps_json=json.dumps([
-                    "Search for your profile on Intelius.com",
-                    "Copy your profile URL",
-                    "Paste URL in the opt-out form",
-                    "Verify your request via email"
-                ])
-            ),
-            RemovalProvider(
-                id="radaris",
-                name="Radaris",
-                opt_out_url="https://radaris.com/control/privacy",
-                eta="24-48 hours",
-                steps_json=json.dumps([
-                    "Search for your listing on Radaris.com",
-                    "Click 'Full Profile' to open your record",
-                    "Copy the profile URL",
-                    "Submit URL in the privacy control form",
-                    "Verify via email"
-                ])
-            ),
-            RemovalProvider(
-                id="peoplefinders",
-                name="PeopleFinders",
-                opt_out_url="https://www.peoplefinders.com/opt-out",
-                eta="5-7 days",
-                steps_json=json.dumps([
-                    "Search for your profile on PeopleFinders.com",
-                    "Copy your profile URL",
-                    "Paste URL in the opt-out form",
-                    "Enter email and solve CAPTCHA",
-                    "Confirm via email"
-                ])
-            ),
-            RemovalProvider(
-                id="mylife",
-                name="MyLife",
-                opt_out_url="https://www.mylife.com/ccpa/index.pubview",
-                eta="7-14 days",
-                steps_json=json.dumps([
-                    "Go to MyLife CCPA opt-out page",
-                    "Submit your name and profile URL",
-                    "Or email privacy@mylife.com with your details",
-                    "Wait for confirmation"
-                ])
-            ),
-            RemovalProvider(
-                id="fastpeoplesearch",
-                name="FastPeopleSearch",
-                opt_out_url="https://www.fastpeoplesearch.com/removal",
-                eta="72 hours",
-                steps_json=json.dumps([
-                    "Search your name on FastPeopleSearch.com",
-                    "Find your listing and click View Free Details",
-                    "Scroll down and click 'Remove My Record'",
-                    "Complete the CAPTCHA and confirm"
-                ])
-            ),
-            RemovalProvider(
-                id="nuwber",
-                name="Nuwber",
-                opt_out_url="https://nuwber.com/removal/link",
-                eta="3-5 days",
-                steps_json=json.dumps([
-                    "Search for your profile on Nuwber.com",
-                    "Copy your profile URL",
-                    "Submit the URL in the removal form",
-                    "Confirm via email"
-                ])
-            ),
-            # Tier 2: Parent Companies (cover multiple sites)
-            RemovalProvider(
-                id="peopleconnect",
-                name="PeopleConnect (TruthFinder/InstantCheckmate)",
-                opt_out_url="https://suppression.peopleconnect.us/login",
-                eta="48-72 hours",
-                steps_json=json.dumps([
-                    "Go to PeopleConnect suppression center",
-                    "Create an account or log in",
-                    "Submit your suppression request",
-                    "This covers TruthFinder, InstantCheckmate, USSearch, and Intelius"
-                ])
-            ),
-            RemovalProvider(
-                id="acxiom",
-                name="Acxiom (Major Data Aggregator)",
-                opt_out_url="https://isapps.acxiom.com/optout/optout.aspx",
-                eta="7-30 days",
-                steps_json=json.dumps([
-                    "Fill in your personal information",
-                    "Submit the opt-out form",
-                    "Acxiom supplies data to thousands of sites",
-                    "Opting out here has wide-reaching effects"
-                ])
-            ),
-            RemovalProvider(
-                id="lexisnexis",
-                name="LexisNexis",
-                opt_out_url="https://consumer.risk.lexisnexis.com/request",
-                eta="7-14 days",
-                steps_json=json.dumps([
-                    "Request your personal data file first",
-                    "Review what data they have on you",
-                    "Submit opt-out request",
-                    "Follow up if needed"
-                ])
-            ),
-            # Tier 3: Additional Brokers
-            RemovalProvider(
-                id="thatsthem",
-                name="That's Them",
-                opt_out_url="https://thatsthem.com/optout",
-                eta="24-48 hours",
-                steps_json=json.dumps([
-                    "Search for your record on ThatsThem.com",
-                    "Copy the record URL",
-                    "Submit opt-out request with the URL",
-                    "Confirm via email"
-                ])
-            ),
-            RemovalProvider(
-                id="familytreenow",
-                name="FamilyTreeNow",
-                opt_out_url="https://www.familytreenow.com/optout",
-                eta="24-48 hours",
-                steps_json=json.dumps([
-                    "Search for your name on FamilyTreeNow.com",
-                    "Find your record",
-                    "Click opt-out and confirm your identity"
-                ])
-            ),
-            RemovalProvider(
-                id="usphonebook",
-                name="USPhoneBook",
-                opt_out_url="https://www.usphonebook.com/opt-out",
-                eta="24-48 hours",
-                steps_json=json.dumps([
-                    "Search for your listing",
-                    "Find your record and click it",
-                    "Click the opt-out link",
-                    "Confirm removal"
-                ])
-            )
-        ]
-        db.session.add_all(providers)
-        db.session.commit()
+            ]
+            db.session.add_all(providers)
+            db.session.commit()
+    except Exception as e:
+        print(f"Startup database setup skipped: {e}")
 
 
 # ===== Home =====
@@ -1343,10 +1351,6 @@ def calculate_refined_score(tracker_data):
     return score
 
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5001))
-    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug, host="0.0.0.0", port=port)
 
 # Khang 
 # ADD TOKEN GENERATOR FOR RECOVER PASSWORD
@@ -1433,3 +1437,13 @@ def reset_password(token):
         return redirect(url_for("home"))
 
     return render_template("reset_password.html")
+
+
+# Kept last on purpose: app.run() blocks, so anything defined below it never
+# executes under `python app.py`. The forgot-password and reset-password
+# routes used to sit after this block, which meant local runs 500ed on every
+# page that renders index.html while gunicorn (which never runs it) was fine.
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5001))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, host="0.0.0.0", port=port)
