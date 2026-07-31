@@ -145,13 +145,22 @@ body {
 
 .topContent {
   position: relative;
-  background-image: url("/static/img/tbg.png");
+  /* Light hero, with its tint baked into the background stack so the dark hero
+     below can cross-fade over the whole thing. */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)),
+    url("/static/img/tbg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-bottom: none;
 }
 
+/* Dark hero as a separate layer that fades in, rather than swapping
+   .topContent's background-image. background-image cannot be transitioned
+   between two images, so the swap snapped instantly while the rest of the
+   theme faded - which is why the home page looked less smooth than the
+   dashboard (no hero image) and About Us (hero mostly hidden behind cards). */
 .topContent::before {
   content: "";
   position: absolute;
@@ -159,8 +168,14 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.75); 
-  backdrop-filter: blur(2px);            
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+    url("/static/img/tbbg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 320ms ease;
   z-index: 0;
 }
 
@@ -173,11 +188,15 @@ body {
   height: 120px; 
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0) 0%,   
-    rgba(247, 247, 248, 1) 100% 
+    rgba(255, 255, 255, 0) 0%,
+    rgba(247, 247, 248, 1) 100%
   );
   z-index: 2;
   pointer-events: none;
+  /* Faded out in dark mode rather than set to `background: none`. A gradient
+     is a background-image and cannot be transitioned, so removing it snapped. */
+  opacity: 1;
+  transition: opacity 320ms ease;
 }
 
 .topContent > * {
@@ -597,17 +616,16 @@ body.dark #signUpBtn:hover {
   background-color: #ffd27f;
   color: #000;
 }
-body.dark .topContent {
-    background-image: url("/static/img/tbbg.png");
-}
-
+/* The dark hero and the fade-out of the bottom gradient are both opacity
+   changes now, so they cross-fade with the rest of the theme instead of
+   snapping. The base .topContent background is deliberately left alone: the
+   ::before layer is opaque at full opacity and covers it. */
 body.dark .topContent::before {
-  background: rgba(0, 0, 0, 0.45); 
-  backdrop-filter: blur(8px);            
+  opacity: 1;
 }
 
 body.dark .topContent::after {
-    background: none;
+  opacity: 0;
 }
 
 body.dark .midContent{
@@ -909,7 +927,10 @@ body.themeTransition *::after {
               color 320ms ease,
               fill 320ms ease,
               stroke 320ms ease,
-              box-shadow 320ms ease !important;
+              box-shadow 320ms ease,
+              backdrop-filter 320ms ease,
+              opacity 320ms ease,
+              filter 320ms ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

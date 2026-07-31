@@ -2652,7 +2652,10 @@ body.themeTransition *::after {
               color 320ms ease,
               fill 320ms ease,
               stroke 320ms ease,
-              box-shadow 320ms ease !important;
+              box-shadow 320ms ease,
+              backdrop-filter 320ms ease,
+              opacity 320ms ease,
+              filter 320ms ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

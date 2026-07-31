@@ -1401,17 +1401,32 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
 
         if user:
-            token = generate_reset_token(user.email)
+            # Mail failures are caught so this route always answers the same way
+            # regardless of whether the address is registered. The send only
+            # happens inside this `if user` branch, so an uncaught exception
+            # here produced a 500 for real accounts and the success message for
+            # everything else - which turned the deliberately vague flash below
+            # into a reliable way to test whether an email has an account.
+            #
+            # It also matters on its own: without mail credentials configured
+            # the whole page crashed instead of degrading.
+            try:
+                if not app.config.get("MAIL_USERNAME") or not app.config.get("MAIL_PASSWORD"):
+                    raise RuntimeError(
+                        "MAIL_USERNAME / MAIL_PASSWORD are not configured"
+                    )
 
-            reset_link = url_for("reset_password", token=token, _external=True)
+                token = generate_reset_token(user.email)
 
-            msg = Message(
-                "Footprint Password Reset",
-                sender=app.config["MAIL_USERNAME"],
-                recipients=[email]
-            )
+                reset_link = url_for("reset_password", token=token, _external=True)
 
-            msg.body = f"""
+                msg = Message(
+                    "Footprint Password Reset",
+                    sender=app.config["MAIL_USERNAME"],
+                    recipients=[email]
+                )
+
+                msg.body = f"""
 Hello,
 
 You requested to reset your Footprint password.
@@ -1425,7 +1440,11 @@ If you did not request this, ignore this email.
 Footprint Security Team
 """
 
-            mail.send(msg)
+                mail.send(msg)
+            except Exception as e:
+                # Server-side only. The user must not be able to tell the
+                # difference between "sent" and "failed to send".
+                app.logger.error("Password reset email failed for %s: %s", email, e)
 
         flash("If that email exists, a reset link has been sent.", "success")
 
