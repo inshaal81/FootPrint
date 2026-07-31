@@ -7,8 +7,21 @@
     <title>footPrint</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
 </head>
 <body>
+    <!-- Applies the saved theme before the page paints, so a dark-mode user
+         does not see a flash of the light theme on every navigation. -->
+    <script>
+        try {
+            var t = localStorage.getItem('footprintTheme');
+            if (t === 'dark' || (!t && window.matchMedia
+                && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark');
+            }
+        } catch (e) {}
+    </script>
+
     <div class="topContent">
         <div class="header">
             

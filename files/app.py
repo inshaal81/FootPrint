@@ -83,10 +83,20 @@ def get_tracker_list():
         return {}
 
 def check_domain_safety(url):
+    """Returns (is_tracker, owner, match, data_available).
+
+    data_available is False when trackers.json is missing or unreadable. That
+    has to be reported separately: with an empty tracker list every lookup
+    misses, which is indistinguishable from a genuinely clean domain and would
+    otherwise tell the user a site is safe when it was never actually checked.
+    """
     trackers = get_tracker_list()
+    if not trackers:
+        return False, "Unknown", {}, False
+
     ext = tldextract.extract(url)
     domain = f"{ext.domain}.{ext.suffix}".lower()
-    
+
     match = trackers.get(domain)
     if not match:
         # Check if any tracker domain is a parent of our current domain
@@ -97,11 +107,11 @@ def check_domain_safety(url):
 
     if match:
         owner = match.get('owner', 'Unknown Entity')
-        score = calculate_refined_score(match) 
-        
-        return True, owner, match # 'match' now contains 'owner', 'score', AND 'risk_reason'
-        
-    return False, "Clean", {}
+        score = calculate_refined_score(match)
+
+        return True, owner, match, True # 'match' now contains 'owner', 'score', AND 'risk_reason'
+
+    return False, "Clean", {}, True
 
 # ===== User model =====
 class User(db.Model):
@@ -1311,8 +1321,21 @@ def scan_url():
     url = data.get("url", "")
     
     # This calls the helper function
-    is_blocked, owner, match = check_domain_safety(url)
-    
+    is_blocked, owner, match, data_available = check_domain_safety(url)
+
+    # The tracker database could not be loaded, so this domain was never
+    # actually checked. Report that instead of implying a clean result.
+    if not data_available:
+        return jsonify({
+            "url": url,
+            "is_tracker": False,
+            "data_available": False,
+            "owner": owner,
+            "risk_score": 0,
+            "risk_reason": "Tracker database unavailable",
+            "message": "This site could not be checked - the tracker database failed to load."
+        })
+
     # Check if match is a dictionary before using .get()
     if isinstance(match, dict) and match:
         # If it's a tracker, get the info
@@ -1326,6 +1349,7 @@ def scan_url():
     return jsonify({
         "url": url,
         "is_tracker": is_blocked,
+        "data_available": True,
         "owner": owner,
         "risk_score": final_score,
         "risk_reason": reason,

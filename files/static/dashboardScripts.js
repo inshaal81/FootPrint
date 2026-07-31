@@ -26,13 +26,8 @@ function safeUrl(url) {
 document.addEventListener('DOMContentLoaded', () => {
 
 
-    // ===== Theme toggle =====
-    const toggle = document.getElementById("themeToggle");
-    if (toggle) {
-        toggle.addEventListener("click", () => {
-            document.body.classList.toggle("dark");
-        });
-    }
+    // Theme toggle lives in theme.js, shared by every page so the choice
+    // persists across navigation.
 
     // ===== Logout button =====
     const logOutBtn = document.getElementById("logOutBtn");
@@ -208,12 +203,24 @@ function animateCollapsible(container, applyChange) {
       container.scrollHeight
   );
 
-  if (Math.abs(endHeight - startHeight) < 1) return;
+  const delta = Math.abs(endHeight - startHeight);
+  if (delta < 1) return;
+
+  // Scale the duration to the distance travelled, clamped. A fixed duration
+  // looks rushed when a list opens by a thousand pixels and sluggish when it
+  // opens by fifty. easeOutQuint moves quickly at first and settles gently,
+  // which reads as smoother than plain ease over a long distance.
+  const duration = Math.min(620, Math.max(260, 240 + delta * 0.28));
+  const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+  // Expose the duration so the item fade can match the height animation
+  // instead of finishing well before it.
+  container.style.setProperty('--collapsible-duration', `${duration}ms`);
 
   container.style.overflow = 'hidden';
   container.style.height = `${startHeight}px`;
   void container.offsetHeight; // force a reflow so the start height takes effect
-  container.style.transition = 'height 0.35s ease';
+  container.style.transition = `height ${duration}ms ${easing}`;
   container.style.height = `${endHeight}px`;
 
   let finished = false;
@@ -232,7 +239,9 @@ function animateCollapsible(container, applyChange) {
   };
 
   container.addEventListener('transitionend', onEnd);
-  setTimeout(cleanup, 600); // fallback in case transitionend never fires
+  // Fallback in case transitionend never fires, so the container cannot be
+  // stranded at a fixed height. Must outlast the (now variable) duration.
+  setTimeout(cleanup, duration + 250);
 }
 
 // Helper to make the "Show More" buttons work for long lists.
@@ -343,7 +352,28 @@ function displayResults(emailResults, passwordResult, trackerResult) {
   }
 
   // 2. TERRY: Tracker Radar / Risk Score Section (Static UI)
-  if (trackerResult) {
+  if (trackerResult && trackerResult.data_available === false) {
+      // The tracker database failed to load, so the site was never checked.
+      // Showing the usual green "Safe" card here would tell the user a site is
+      // clean purely because we had nothing to compare it against.
+      resultsHTML += `
+          <div class="tracker-analysis-card risk-unknown">
+              <div class="tracker-header">
+                  <h4>🔍 Website Privacy Analysis</h4>
+                  <span class="risk-badge risk-badge-unknown">Not checked</span>
+              </div>
+
+              <p class="tracker-detection tracker-detection-unknown">
+                  ⚠️ Tracker database unavailable
+              </p>
+
+              <p class="tracker-description">
+                  This site could not be checked against the tracker database, so
+                  it is <strong>not</strong> confirmed safe. Try again shortly.
+              </p>
+          </div>
+      `;
+  } else if (trackerResult) {
       const score = trackerResult.risk_score || 1;
       // Define colors based on risk level
       const color = score >= 7 ? "#dc3545" : (score >= 4 ? "#ffc107" : "#28a745");

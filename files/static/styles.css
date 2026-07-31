@@ -296,7 +296,11 @@ body {
 }
 
 .endContent {
-  padding: 50px;
+  /* Horizontal padding matches .midContent (100px) so the How It Works box
+     lines up with the Key Features row above it. It was 50px all round, which
+     made this section 100px wider than the one above and visibly misaligned.
+     Vertical padding stays at 50px to keep the original spacing rhythm. */
+  padding: 50px 100px;
   border-bottom: none;
   transition: background-color 0.4s ease;
 }
@@ -887,4 +891,119 @@ body.dark .miniCard {
 body.dark .stepNum {
   background: #ffd27f;
   color: #000;
+}
+/* ===== Theme switch transition =====
+   theme.js adds .themeTransition to <body> for the duration of a theme change.
+   Only a handful of elements carry their own colour transition, so without this
+   those few faded while everything else snapped instantly - which is what made
+   the toggle feel abrupt. Applying it to every element for the switch only, and
+   removing it afterwards, keeps the change uniform without permanently
+   overriding any other transition. */
+body.themeTransition,
+body.themeTransition *,
+body.themeTransition *::before,
+body.themeTransition *::after {
+  transition: background-color 320ms ease,
+              background-image 320ms ease,
+              border-color 320ms ease,
+              color 320ms ease,
+              fill 320ms ease,
+              stroke 320ms ease,
+              box-shadow 320ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.themeTransition,
+  body.themeTransition *,
+  body.themeTransition *::before,
+  body.themeTransition *::after {
+    transition: none !important;
+  }
+}
+
+/* ===== About Us page fixes ===== */
+
+/* .topContent carries padding-bottom: 540px for the tall hero on the home
+   page. On About Us it wraps the whole article, so that turned into a huge
+   band of dead space before the footer. Match the 100px gap .topSection uses
+   between the header and the About Us banner, so the spacing above the first
+   card and below the last one is the same. */
+body.about-page .topContent {
+  padding-bottom: 100px;
+}
+
+/* .subtextOne carries margin-bottom: 35px, which stacked on .infoSection's
+   18px padding and made every card's bottom gap 53px against an 18px top.
+   Dropping the trailing margin leaves the padding symmetric. */
+.infoSection > :last-child {
+  margin-bottom: 0;
+}
+
+/* Numbered lists, using the same orange circle as the How Footprint Works
+   steps so the two numbering styles on this page match. */
+.numberList {
+  list-style: none;
+  counter-reset: numberList;
+  padding-left: 0;
+  margin-top: 8px;
+}
+
+.numberList li {
+  counter-increment: numberList;
+  /* Deliberately not display:flex. A flex li turns the <strong> label and the
+     text after it into separate flex items, so they render as two columns
+     instead of one flowing sentence. Keeping the li a block and positioning
+     the circle absolutely lets the inline content wrap normally. */
+  position: relative;
+  padding-left: 38px;
+  min-height: 28px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.numberList li::before {
+  content: counter(numberList);
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* Fixed size so the circle is never squashed into an oval by long text. */
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Same guard for the step numbers, which were rendering as ovals of differing
+   widths depending on how much text sat beside them. */
+.stepRow .stepNum {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  align-self: flex-start;
+}
+
+/* Dark mode for the About Us article text. The card backgrounds were already
+   darkened but the text on top of them was not, leaving the section headings
+   and mini-card copy as near-black on near-black. */
+body.dark .sectionHeading,
+body.dark .miniTitle {
+  color: #ffffff;
+}
+
+body.dark .numberList li,
+body.dark .miniText,
+body.dark .stepText {
+  color: #aaaaaa;
+}
+
+body.dark .numberList li strong,
+body.dark .stepText strong {
+  color: #e5e7eb;
 }

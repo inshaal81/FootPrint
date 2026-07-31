@@ -5,9 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>footPrint - About Us</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}" defer></script>
 </head>
 
 <body class="about-page">
+    <!-- Applies the saved theme before the page paints, so a dark-mode user
+         does not see a flash of the light theme on every navigation. -->
+    <script>
+        try {
+            var t = localStorage.getItem('footprintTheme');
+            if (t === 'dark' || (!t && window.matchMedia
+                && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark');
+            }
+        } catch (e) {}
+    </script>
+
   <div class="topContent">
     <div class="header">
         <div class="logo">
@@ -19,7 +32,9 @@
       <div class="headerItems">
         <div>
           <ul class="headerLinks">
-            <li><a href="{{ url_for('about') }}" class="aboutUs">About Us</a></li>
+            <!-- Already on About Us, so this slot links home instead of to the
+                 page the user is looking at. -->
+            <li><a href="{{ url_for('home') }}" class="aboutUs">Home</a></li>
           </ul>
         </div>
 
@@ -44,25 +59,16 @@
       Footprint makes those risks easier to see, so you can take action with confidence.
     </div>
 
-    <!-- WHAT IS FOOTPRINT -->
-    <div class="infoSection">
-      <h2 class="sectionHeading">What is Footprint?</h2>
-      <p class="subtextOne">
-        <span class="highlight">Footprint</span> is a privacy dashboard that checks whether your email or password has been exposed in known breaches,
-        then helps you take the next steps—like securing accounts and removing your data from data broker websites.
-      </p>
-    </div>
-
     <!-- WHAT IT DOES -->
     <div class="infoSection">
       <h2 class="sectionHeading">What Footprint Can Do</h2>
-      <ul class="bulletList">
+      <ol class="numberList">
         <li><strong>Email breach check:</strong> shows if your email appears in public breach databases and lists the breached services.</li>
         <li><strong>Password exposure check:</strong> checks whether a password has been seen in known breaches (without sending your raw password).</li>
         <li><strong>Breach-specific action steps:</strong> gives security steps for certain services (example: LinkedIn, Adobe, Dropbox, etc.).</li>
         <li><strong>Data removal protocol:</strong> provides opt-out links and step-by-step instructions for common data broker sites.</li>
         <li><strong>Website ratings & reviews:</strong> lets users rate scanned websites and view community reviews in a dedicated ratings page.</li>
-      </ul>
+      </ol>
     </div>
 
     <!-- TECHNOLOGY -->
@@ -100,7 +106,7 @@
     <!-- APIS USED -->
     <div class="infoSection">
       <h2 class="sectionHeading">APIs We Use</h2>
-      <ul class="bulletList">
+      <ol class="numberList">
         <li>
           <strong>XposedOrNot API</strong> — checks if an email appears in known breach datasets and returns the breach names.
         </li>
@@ -111,7 +117,7 @@
         <li>
           <strong>Footprint Internal APIs</strong> — removal protocol routes and website review routes powered by our own database.
         </li>
-      </ul>
+      </ol>
     </div>
 
     <!-- HOW IT WORKS -->
@@ -166,9 +172,17 @@
       <h2 class="sectionHeading">Contact</h2>
       <p class="subtextOne">
         We’re happy to hear feedback or suggestions at
-        <a href="mailto:footprint.teammm@gmail.com" class="highlight">footprint.teammm@gmail.com</a>.
+        <a href="mailto:mi398@drexel.edu" class="highlight">mi398@drexel.edu</a>
       </p>
     </div>
 
   </div>
 </div>
+</div>
+
+<div class="footer">
+    Copyright @ footPrint 2025
+</div>
+
+</body>
+</html>

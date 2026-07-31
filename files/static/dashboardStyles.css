@@ -952,13 +952,17 @@ body.dark .breachAdvice {
    animation is used rather than a transition because an element coming back
    from display:none has no previous state to transition from. */
 .expanded > [data-collapsible] {
-  animation: collapsibleFadeIn 0.3s ease both;
+  /* Duration is set inline by animateCollapsible so the fade lands with the
+     height animation rather than finishing well before it. The fallback covers
+     the case where the height did not change and no inline value was set. */
+  animation: collapsibleFadeIn var(--collapsible-duration, 320ms)
+             cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes collapsibleFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -2511,6 +2515,26 @@ body.dark .reviewPreviewMeta {
   border-color: #bbf7d0;
 }
 
+/* Neutral grey, deliberately not green: the site was not checked, so it must
+   not read as a clean result. */
+.tracker-analysis-card.risk-unknown {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-color: #cbd5e1;
+  border-left-color: #64748b;
+}
+
+.tracker-analysis-card.risk-unknown .tracker-header h4 {
+  color: #334155;
+}
+
+.risk-badge-unknown {
+  background: #64748b;
+}
+
+.tracker-detection-unknown {
+  color: #475569;
+}
+
 /* Progress Bar */
 /* Translucent so it reads correctly on any of the risk tints above. */
 .risk-meter-container {
@@ -2572,6 +2596,20 @@ body.dark .tracker-analysis-card.risk-low {
   border-color: #2d5a2d;
 }
 
+body.dark .tracker-analysis-card.risk-unknown {
+  background: linear-gradient(135deg, #1a1d21, #22262b);
+  border-color: #3f4650;
+  border-left-color: #94a3b8;
+}
+
+body.dark .tracker-analysis-card.risk-unknown .tracker-header h4 {
+  color: #e2e8f0;
+}
+
+body.dark .tracker-detection-unknown {
+  color: #cbd5e1;
+}
+
 /* body.dark does not redefine the :root custom properties, so anything using
    var(--text) / var(--muted) needs an explicit override here. */
 body.dark .tracker-header h4 {
@@ -2596,4 +2634,32 @@ body.dark .tracker-description {
 
 body.dark .tracker-description strong {
   color: #f3f4f6;
+}
+/* ===== Theme switch transition =====
+   theme.js adds .themeTransition to <body> for the duration of a theme change.
+   Only a handful of elements carry their own colour transition, so without this
+   those few faded while everything else snapped instantly - which is what made
+   the toggle feel abrupt. Applying it to every element for the switch only, and
+   removing it afterwards, keeps the change uniform without permanently
+   overriding any other transition. */
+body.themeTransition,
+body.themeTransition *,
+body.themeTransition *::before,
+body.themeTransition *::after {
+  transition: background-color 320ms ease,
+              background-image 320ms ease,
+              border-color 320ms ease,
+              color 320ms ease,
+              fill 320ms ease,
+              stroke 320ms ease,
+              box-shadow 320ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.themeTransition,
+  body.themeTransition *,
+  body.themeTransition *::before,
+  body.themeTransition *::after {
+    transition: none !important;
+  }
 }

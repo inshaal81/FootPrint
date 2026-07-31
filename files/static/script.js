@@ -7,9 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginModal.style.display = "flex";
     }
 
-    // ===== Theme toggle =====
-    const toggle = document.getElementById("themeToggle");
-    toggle?.addEventListener("click", () => document.body.classList.toggle("dark"));
+    // Theme toggle lives in theme.js, shared by every page so the choice
+    // persists across navigation.
 
     // ===== Open login modal =====
     const loginBtn = document.getElementById("logInBtn");
